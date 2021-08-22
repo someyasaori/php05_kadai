@@ -1,0 +1,153 @@
+/* 登録 user_index.php*/
+
+.header-wrapper ul{
+    overflow: hidden;
+    padding-right: 30px;
+}
+.header-wrapper li{
+    float: right;
+    /* width: 200px; */
+    font-size: 15px;
+    margin: 10px;
+}
+
+.header-wrapper ul li{
+    display: inline;
+}
+
+li:hover{
+    background-color:#ffffe0;
+}
+
+
+main{
+    max-width:1200px;
+    height: auto;
+    margin:auto;
+    
+}
+
+h1{
+    font-size: 25px;
+    color:#00008b;
+    font-weight:bold;
+    text-align: center;
+    margin-top:30px;
+}
+
+h2{
+    font-size: 20px;
+    color:#0000ff;
+    font-weight:bold;
+    text-align: center;
+    margin:30px 0 30px 0;
+}
+
+.centering{
+    display: flex;
+    justify-content: center;
+    align-items: center;
+}
+
+#name{
+    margin-left: 15px;
+    height:25px;
+}
+
+#lid{
+    margin-left: 20px;
+    height:25px;
+}
+#lpw{
+    margin-left: 15px;
+    height:25px;
+}
+
+.kanri{
+    display: flex;
+    justify-content:center;
+    align-items: baseline;
+}
+
+#kanri_flg{
+    margin:10px 20px 0 0;
+}
+
+.life{
+    display: flex;
+    justify-content: center;
+    align-items: baseline;
+}
+
+#life_flg{
+    margin:10px 50px 0 0;
+}
+
+#submit{
+    height: 25px;
+    width:100px;
+    margin: 30px 80px 30px 80px;
+    text-align: center;
+    border: none;
+    color: #ffffff;
+    background-color: #5f9ea0;
+    border-radius: 10px;
+    cursor: pointer;
+    box-shadow: 0px 5px 15px 0px #a9a9a9;
+}
+
+.all{
+    text-align: center;
+    margin: 20px;
+}
+
+
+
+
+/* 結果表示 select.php */
+
+.summary{
+    max-width:1200px;
+    font-size: 20px;
+    color:#00008b;
+    font-weight:bold;
+    text-align: center;
+}
+
+.result{
+    max-width:1200px;
+}
+
+table{
+    max-width: 1000px;
+    margin:auto;
+    margin-top:30px;
+}
+
+th{
+    width:10%;
+    font-size:16px;
+    color:#696969;
+    background-color:#b0e0e6;
+    border:1px solid #00008b;
+    /* border-bottom: 1px solid #0000cd;
+    border-right: 1px solid #0000cd; */
+    text-align: center;
+}
+
+td{
+    font-size:12px;
+    color:#000000;
+    background-color:#fffafa;
+    border:1px solid #00008b;
+    /* border-bottom: 1px solid #0000cd;
+    border-right: 1px solid #0000cd; */
+    text-align: center;
+}
+.return{
+    max-width:1200px;
+    font-size: 15px;
+    text-align: center;
+    margin-top: 50px;
+
+}
