@@ -92,6 +92,36 @@ if($row5 = $stmt5 -> fetch()){
     $sum_three_month_before = $row5['Wh'];
     }
 
+//時刻フラグのカラムを追記
+$stmt8 =$pdo->prepare ("ALTER TABLE $table_name ADD hour INT(10) FIRST;
+ALTER TABLE $table_name ADD bill INT(16);
+UPDATE $table_name SET hour=0 WHERE TIME(time) BETWEEN '00:00:00' AND '00:59:59';
+UPDATE $table_name SET hour=1 WHERE TIME(time) BETWEEN '01:00:00' AND '01:59:59';
+UPDATE $table_name SET hour=2 WHERE TIME(time) BETWEEN '02:00:00' AND '02:59:59';
+UPDATE $table_name SET hour=3 WHERE TIME(time) BETWEEN '03:00:00' AND '03:59:59';
+UPDATE $table_name SET hour=4 WHERE TIME(time) BETWEEN '04:00:00' AND '04:59:59';
+UPDATE $table_name SET hour=5 WHERE TIME(time) BETWEEN '05:00:00' AND '05:59:59';
+UPDATE $table_name SET hour=6 WHERE TIME(time) BETWEEN '06:00:00' AND '06:59:59';
+UPDATE $table_name SET hour=7 WHERE TIME(time) BETWEEN '07:00:00' AND '07:59:59';
+UPDATE $table_name SET hour=8 WHERE TIME(time) BETWEEN '08:00:00' AND '08:59:59';
+UPDATE $table_name SET hour=9 WHERE TIME(time) BETWEEN '09:00:00' AND '09:59:59';
+UPDATE $table_name SET hour=10 WHERE TIME(time) BETWEEN '10:00:00' AND '10:59:59';
+UPDATE $table_name SET hour=11 WHERE TIME(time) BETWEEN '11:00:00' AND '11:59:59';
+UPDATE $table_name SET hour=12 WHERE TIME(time) BETWEEN '12:00:00' AND '12:59:59';
+UPDATE $table_name SET hour=13 WHERE TIME(time) BETWEEN '13:00:00' AND '13:59:59';
+UPDATE $table_name SET hour=14 WHERE TIME(time) BETWEEN '14:00:00' AND '14:59:59';
+UPDATE $table_name SET hour=15 WHERE TIME(time) BETWEEN '15:00:00' AND '15:59:59';
+UPDATE $table_name SET hour=16 WHERE TIME(time) BETWEEN '16:00:00' AND '16:59:59';
+UPDATE $table_name SET hour=17 WHERE TIME(time) BETWEEN '17:00:00' AND '17:59:59';
+UPDATE $table_name SET hour=18 WHERE TIME(time) BETWEEN '18:00:00' AND '18:59:59';
+UPDATE $table_name SET hour=19 WHERE TIME(time) BETWEEN '19:00:00' AND '19:59:59';
+UPDATE $table_name SET hour=20 WHERE TIME(time) BETWEEN '20:00:00' AND '20:59:59';
+UPDATE $table_name SET hour=21 WHERE TIME(time) BETWEEN '21:00:00' AND '21:59:59';
+UPDATE $table_name SET hour=22 WHERE TIME(time) BETWEEN '22:00:00' AND '22:59:59';
+UPDATE $table_name SET hour=23 WHERE TIME(time) BETWEEN '23:00:00' AND '23:59:59'");
+
+$status = $stmt8->execute();
+
 //DB接続（電気料金メニューデータ）
 $pdo0 = db_conn2(); 
 //登録されているテーブル全て
@@ -130,15 +160,24 @@ UPDATE standard SET hour=19 WHERE TIME(time) BETWEEN '19:00:00' AND '19:59:59';
 UPDATE standard SET hour=20 WHERE TIME(time) BETWEEN '20:00:00' AND '20:59:59';
 UPDATE standard SET hour=21 WHERE TIME(time) BETWEEN '21:00:00' AND '21:59:59';
 UPDATE standard SET hour=22 WHERE TIME(time) BETWEEN '22:00:00' AND '22:59:59';
-UPDATE standard SET hour=23 WHERE TIME(time) BETWEEN '23:00:00' AND '23:59:59';
-SELECT * FROM standard;
--- ALTER TABLE $table_name ADD bill INT(10) ;
-
- ");
+UPDATE standard SET hour=23 WHERE TIME(time) BETWEEN '23:00:00' AND '23:59:59' ");
 
 $status = $stmt7->execute();
 
+//今月の電気料金を計算したい
+$stmt9 =$pdo->prepare
+("UPDATE power_db.$table_name LEFT JOIN tepco.standard 
+ON power_db.$table_name.hour = tepco.standard.hour
+SET power_db.$table_name.bill = tepco.standard.var_s1 * power_db.$table_name.wh/2;
+SELECT SUM(bill) as bill FROM $table_name WHERE time BETWEEN '$this_month' AND '$today' ");
 
+$status = $stmt9->execute();
+echo $stmt9;
+exit();
+
+// UPDATE power_db.id2 LEFT JOIN tepco.standard 
+// ON power_db.id2.hour = tepco.standard.hour
+// SET power_db.id2.bill = tepco.standard.var_s1 * power_db.id2.wh/2
 
 // $view="";
 
@@ -175,14 +214,14 @@ $status = $stmt7->execute();
 <body>
 <h2>最近のでんきの使い方は？</h2>
 
-<table class="result">
+<!-- <table class="result">
     <tr>
     <th>時間</th>
 	<th>基本料金</th>
 	<th>従量料金1段目</th>
     </tr>
     <?= $view ?>
-</table>
+</table> -->
 
 
 <canvas id="chart" height="100" width="200"></canvas>
