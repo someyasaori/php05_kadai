@@ -43,7 +43,8 @@ if($row1 = $stmt1 -> fetch()){
 //今月の合計
 $this_month = date('Y-m-d', strtotime('first day of this month'));
 $today = date('Y-m-d H:i:s', strtotime('now'));
-$stmt2 =$pdo->prepare ("SELECT SUM(wh) as wh FROM $table_name WHERE plot_date_time BETWEEN '$this_month' AND '$today' ");
+$stmt2 =$pdo->prepare 
+("SELECT SUM(wh) as wh FROM $table_name WHERE plot_date_time BETWEEN '$this_month' AND '$today'");
 $status = $stmt2->execute();
 if($row2 = $stmt2 -> fetch()){
     $sum_this_month = $row2['wh'];
@@ -93,152 +94,107 @@ if($row5 = $stmt5 -> fetch()){
     }
 
 //DB接続（電気料金メニューデータ）
-$pdo0 = db_conn2(); 
+// $pdo0 = db_conn2(); 
 
-$stmt9 =$pdo0->prepare
-("ALTER TABLE power_db.$table_name ADD bill INT(16);
-SELECT power_db.$table_name.plot_date_time,
- tepco.standard.var_s1,
- power_db.$table_name.wh
-FROM power_db.$table_name LEFT JOIN tepco.standard ON DATE_FORMAT(power_db.$table_name.plot_date_time, '%Y-%m-%d %H:%i:%s') = tepco.standard.plot_date_time;
-SELECT * FROM power_db.$table_name
--- SET power_db.$table_name.bill = tepco.standard.var_s1 * power_db.$table_name.wh/2;
--- SELECT SUM(bill) as bill FROM power_db.$table_name WHERE plot_date_time BETWEEN '$this_month' AND '$today' ");
-$status = $stmt9->execute();
+// $mysql =['host'=>'localhost', 'dbname'=>'power_db', 'user'=>'root', 'pass'=>'root'];
 
-$view="";
+// //connects with PDO 
+// try {
+//     $conn = new PDO('mysql:host='. $mysql['host'] .'; dbname='. $mysql['dbname'], $mysql['user'], $mysql['pass']);
+//     $conn->setAttribute(PDO::ATTR_ERRMODE, PDO::ERRMODE_EXCEPTION); //set the PDO error mode to exception
+//   }
+//   catch(PDOException $e){ exit('Connection failed: '. $e->getMessage());}
 
-if($stmt9==false){
-    sql_error($stmt9);
-}else{
 
-if($status9==false){
-    $error9 = $stmt9->errorInfor();
-    exit("ErrorQuery:". $error9[2]);
-}else{
-    while ($result9 = $stmt9->fetch(PDO::FETCH_ASSOC)){
-        $view .= "<tr>";
-        $view .= "<td>".h($result9['plot_date_time']).'</td><td>'.h($result9['wh']).'</td><td>'.h($result7['bill']);
-        $view .= "</tr>";
-    }
-
-    }
-}
-
+// $stmt9 =$pdo->prepare 
+// ("SELECT $table_name.plot_date_time, tepco_standard.var_s1, $table_name.wh, SUM(tepco_standard.var_s1 * $table_name.wh/2) as bill
+//     FROM $table_name LEFT JOIN tepco_standard ON DATE_FORMAT($table_name.plot_date_time, '%H:%i:%s') = DATE_FORMAT(tepco_standard.plot_date_time, '%H:%i:%s') 
+//     AND var_s1
+//     WHERE plot_date_time BETWEEN '$this_month' AND '$today' ");
+// $status = $stmt9->execute();
 // if($row9 = $stmt9 -> fetch()){
 //     $bill_this_month = $row9['bill'];
 //     }
 
-// SELECT
-//   id2.plot_date_time,
-//   standard.var_s1,
-//   id2.wh
-// FROM id2 LEFT JOIN standard ON DATE_FORMAT(id2.plot_date_time, '%Y-%m-%d %H:%i:%s') = standard.plot_date_time
+// var_dump ($row9);
+
+$stmt9 =$pdo->prepare 
+("SELECT 
+   sum(tepco_standard.var_s1 * $table_name.wh/2) AS bill
+FROM
+	$table_name
+LEFT JOIN 
+	tepco_standard 
+ON 
+    DATE_FORMAT($table_name.plot_date_time, '%H:%i:%s') = DATE_FORMAT(tepco_standard.plot_date_time, '%H:%i:%s')
+WHERE
+DATE_FORMAT($table_name.plot_date_time, '%Y-%m-%d %H:%i:%s')
+
+BETWEEN '2021-08-01 00:00:00' AND '2021-08-26 22:00:00'");
+
+$status = $stmt9->execute();
+if($row9 = $stmt9 -> fetch()){
+    $bill_this_month = $row9['bill'];
+    }
 
 
+$stmt10 =$pdo->prepare 
+("SELECT 
+   sum(tepco_standard.var_s1 * $table_name.wh/2) AS bill
+FROM
+	$table_name
+LEFT JOIN 
+	tepco_standard 
+ON 
+    DATE_FORMAT($table_name.plot_date_time, '%H:%i:%s') = DATE_FORMAT(tepco_standard.plot_date_time, '%H:%i:%s')
+WHERE
+DATE_FORMAT($table_name.plot_date_time, '%Y-%m-%d %H:%i:%s')
+BETWEEN
+'$month_two' AND '$end_month_two'");
 
+$status = $stmt10->execute();
+
+if($row10 = $stmt10 -> fetch()){
+    $bill_last_month = $row10['bill'];
+    }
+
+var_dump($bill_last_month);
+
+// $stmt9 =$pdo->prepare 
+// ("SELECT $table_name.plot_date_time, tepco_standard.var_s1, $table_name.wh
+//     FROM $table_name LEFT JOIN tepco_standard ON DATE_FORMAT($table_name.plot_date_time, '%H:%i:%s') = DATE_FORMAT(tepco_standard.plot_date_time, '%H:%i:%s') ");
+
+// $status = $stmt9->execute();
+
+// $stmt10 =$pdo->prepare 
+// ("SELECT  tepco_standard.var_s1 * $table_name.wh/2 AS bill FROM $table_name LEFT JOIN tepco_standard ON var_s1");
+// $status = $stmt10->execute();
+
+
+// $stmt11 =$pdo->prepare 
+// ("SELECT SUM(bill) as bill FROM $table_name WHERE plot_date_time BETWEEN '$this_month' AND '$today' ");
+// $status = $stmt11->execute();
+// if($row11 = $stmt11 -> fetch()){
+//     $bill_this_month = $row11['bill'];
+//     }
+
+// var_dump ($row11);
+
+
+//   $sql ="SELECT $table_name.plot_date_time,
+//     tepco_standard.var_s1,
+//     $table_name.wh
+//     FROM $table_name LEFT JOIN tepco_standard ON DATE_FORMAT($table_name.plot_date_time, '%H:%i:%s') = DATE_FORMAT(tepco_standard.plot_date_time, '%H:%i:%s') ;
+//     ALTER TABLE power_db.$table_name ADD bill INT(16);
+//     SET power_db.$table_name.bill = tepco.standard.var_s1 * power_db.$table_name.wh/2;
+//     SELECT SUM(bill) as bill FROM power_db.$table_name WHERE plot_date_time BETWEEN '$this_month' AND '$today' ";
+
+//  $stmt9 = $conn->query($sql);
+
+ 
 // echo $bill_this_month;
 // exit();
 
-//登録されているテーブル全て
-// $stmt0 = $pdo0->prepare("SELECT * FROM standard");
-// //実行
-// $status = $stmt0->execute();
-
-// //電力量データと電気料金メニューデータの掛け合わせ
-// //時刻フラグのカラムを追記
-// // $stmt6 =$pdo->prepare ("ALTER TABLE standard ADD hour INT(10) FIRST");
-// // $status = $stmt6->execute();
-
-
-// $stmt7 =$pdo->prepare
-//  ("ALTER TABLE standard ADD hour INT(10) FIRST;
-// UPDATE standard SET hour=0 WHERE TIME(time) BETWEEN '00:00:00' AND '00:59:59';
-// UPDATE standard SET hour=1 WHERE TIME(time) BETWEEN '01:00:00' AND '01:59:59';
-// UPDATE standard SET hour=2 WHERE TIME(time) BETWEEN '02:00:00' AND '02:59:59';
-// UPDATE standard SET hour=3 WHERE TIME(time) BETWEEN '03:00:00' AND '03:59:59';
-// UPDATE standard SET hour=4 WHERE TIME(time) BETWEEN '04:00:00' AND '04:59:59';
-// UPDATE standard SET hour=5 WHERE TIME(time) BETWEEN '05:00:00' AND '05:59:59';
-// UPDATE standard SET hour=6 WHERE TIME(time) BETWEEN '06:00:00' AND '06:59:59';
-// UPDATE standard SET hour=7 WHERE TIME(time) BETWEEN '07:00:00' AND '07:59:59';
-// UPDATE standard SET hour=8 WHERE TIME(time) BETWEEN '08:00:00' AND '08:59:59';
-// UPDATE standard SET hour=9 WHERE TIME(time) BETWEEN '09:00:00' AND '09:59:59';
-// UPDATE standard SET hour=10 WHERE TIME(time) BETWEEN '10:00:00' AND '10:59:59';
-// UPDATE standard SET hour=11 WHERE TIME(time) BETWEEN '11:00:00' AND '11:59:59';
-// UPDATE standard SET hour=12 WHERE TIME(time) BETWEEN '12:00:00' AND '12:59:59';
-// UPDATE standard SET hour=13 WHERE TIME(time) BETWEEN '13:00:00' AND '13:59:59';
-// UPDATE standard SET hour=14 WHERE TIME(time) BETWEEN '14:00:00' AND '14:59:59';
-// UPDATE standard SET hour=15 WHERE TIME(time) BETWEEN '15:00:00' AND '15:59:59';
-// UPDATE standard SET hour=16 WHERE TIME(time) BETWEEN '16:00:00' AND '16:59:59';
-// UPDATE standard SET hour=17 WHERE TIME(time) BETWEEN '17:00:00' AND '17:59:59';
-// UPDATE standard SET hour=18 WHERE TIME(time) BETWEEN '18:00:00' AND '18:59:59';
-// UPDATE standard SET hour=19 WHERE TIME(time) BETWEEN '19:00:00' AND '19:59:59';
-// UPDATE standard SET hour=20 WHERE TIME(time) BETWEEN '20:00:00' AND '20:59:59';
-// UPDATE standard SET hour=21 WHERE TIME(time) BETWEEN '21:00:00' AND '21:59:59';
-// UPDATE standard SET hour=22 WHERE TIME(time) BETWEEN '22:00:00' AND '22:59:59';
-// UPDATE standard SET hour=23 WHERE TIME(time) BETWEEN '23:00:00' AND '23:59:59' ");
-
-// $status = $stmt7->execute();
-
-//時刻フラグのカラムを追記
-// $stmt8 =$pdo->prepare ("ALTER TABLE $table_name ADD hour INT(10) FIRST;
-// ALTER TABLE $table_name ADD bill INT(16);
-// UPDATE $table_name SET hour=0 WHERE TIME(time) BETWEEN '00:00:00' AND '00:59:59';
-// UPDATE $table_name SET hour=1 WHERE TIME(time) BETWEEN '01:00:00' AND '01:59:59';
-// UPDATE $table_name SET hour=2 WHERE TIME(time) BETWEEN '02:00:00' AND '02:59:59';
-// UPDATE $table_name SET hour=3 WHERE TIME(time) BETWEEN '03:00:00' AND '03:59:59';
-// UPDATE $table_name SET hour=4 WHERE TIME(time) BETWEEN '04:00:00' AND '04:59:59';
-// UPDATE $table_name SET hour=5 WHERE TIME(time) BETWEEN '05:00:00' AND '05:59:59';
-// UPDATE $table_name SET hour=6 WHERE TIME(time) BETWEEN '06:00:00' AND '06:59:59';
-// UPDATE $table_name SET hour=7 WHERE TIME(time) BETWEEN '07:00:00' AND '07:59:59';
-// UPDATE $table_name SET hour=8 WHERE TIME(time) BETWEEN '08:00:00' AND '08:59:59';
-// UPDATE $table_name SET hour=9 WHERE TIME(time) BETWEEN '09:00:00' AND '09:59:59';
-// UPDATE $table_name SET hour=10 WHERE TIME(time) BETWEEN '10:00:00' AND '10:59:59';
-// UPDATE $table_name SET hour=11 WHERE TIME(time) BETWEEN '11:00:00' AND '11:59:59';
-// UPDATE $table_name SET hour=12 WHERE TIME(time) BETWEEN '12:00:00' AND '12:59:59';
-// UPDATE $table_name SET hour=13 WHERE TIME(time) BETWEEN '13:00:00' AND '13:59:59';
-// UPDATE $table_name SET hour=14 WHERE TIME(time) BETWEEN '14:00:00' AND '14:59:59';
-// UPDATE $table_name SET hour=15 WHERE TIME(time) BETWEEN '15:00:00' AND '15:59:59';
-// UPDATE $table_name SET hour=16 WHERE TIME(time) BETWEEN '16:00:00' AND '16:59:59';
-// UPDATE $table_name SET hour=17 WHERE TIME(time) BETWEEN '17:00:00' AND '17:59:59';
-// UPDATE $table_name SET hour=18 WHERE TIME(time) BETWEEN '18:00:00' AND '18:59:59';
-// UPDATE $table_name SET hour=19 WHERE TIME(time) BETWEEN '19:00:00' AND '19:59:59';
-// UPDATE $table_name SET hour=20 WHERE TIME(time) BETWEEN '20:00:00' AND '20:59:59';
-// UPDATE $table_name SET hour=21 WHERE TIME(time) BETWEEN '21:00:00' AND '21:59:59';
-// UPDATE $table_name SET hour=22 WHERE TIME(time) BETWEEN '22:00:00' AND '22:59:59';
-// UPDATE $table_name SET hour=23 WHERE TIME(time) BETWEEN '23:00:00' AND '23:59:59'");
-
-// $status = $stmt8->execute();
-
-//今月の電気料金を計算したい
-// $stmt9 =$pdo->prepare
-// ("UPDATE power_db.$table_name LEFT JOIN tepco.standard 
-// ON power_db.$table_name.hour = tepco.standard.hour
-// SET power_db.$table_name.bill = tepco.standard.var_s1 * power_db.$table_name.wh/2;
-// SELECT SUM(bill) as bill FROM $table_name WHERE time BETWEEN '$this_month' AND '$today' ");
-
-// UPDATE power_db.id2 LEFT JOIN tepco.standard 
-// ON power_db.id2.hour = tepco.standard.hour
-// SET power_db.id2.bill = tepco.standard.var_s1 * power_db.id2.wh/2
-
-// $view="";
-
-// if($stmt7==false){
-//     sql_error($stmt7);
-// }else{
-
-// if($status7==false){
-//     $error7 = $stmt7->errorInfor();
-//     exit("ErrorQuery:". $error7[2]);
-// }else{
-//     while ($result7 = $stmt7->fetch(PDO::FETCH_ASSOC)){
-//         $view .= "<tr>";
-//         $view .= "<td>".h($result7['hour']).'</td><td>'.h($result7['time']).'</td><td>'.h($result7['var_s1']);
-//         $view .= "</tr>";
-//     }
-
-//     }
-// }
 
 ?>
 
@@ -256,18 +212,19 @@ if($status9==false){
 <body>
 <h2>最近のでんきの使い方は？</h2>
 
-<table class="result">
+<!-- <table class="result">
     <tr>
     <th>時間</th>
 	<th>基本料金</th>
 	<th>従量料金1段目</th>
     </tr>
     <?= $view ?>
-</table>
-
-<!-- <?= $bill_this_month ?> -->
+</table> -->
 
 <canvas id="chart" height="100" width="200"></canvas>
+
+<p><span id="today"></span>までの電気料金： <?= $bill_this_month ?></p>
+<p>先月の電気料金： <?= $bill_last_month ?></p>
 
 <p class="return"><a href="index.php">トップに戻る</a></p>
 
@@ -280,6 +237,13 @@ if($status9==false){
 <script>
 
 //年月表示の整理
+let today = new Date();
+let year = today.getFullYear();
+let month =today.getMonth()+1;
+let date = today.getDate();
+let latest_day = '<p>'+year+'/'+month+'/'+date+'</p>'; 
+$("#today").html(latest_day); 
+
 let this_month = '<?= $this_year ?>'+'/'+'<?= $this_month ?>'
 let one_month_before = '<?= $this_year ?>'+'/'+'<?= $one_month_before ?>'
 let two_month_before = '<?= $this_year ?>'+'/'+'<?= $two_month_before ?>'

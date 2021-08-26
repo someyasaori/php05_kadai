@@ -21,23 +21,6 @@
 </header>
 
 <h1>かしこく電気を使おう 目次</h1>
-<!-- <main> -->
-<!-- <div class="sub">
-    <h2>新しい資料を登録</h2>
-    <form method="POST" action="insert.php">
-        <p>タイトル<input type="text" name="title" id="title" size ="15"></p>
-        <p>URL<input type="text" name="url" id="url" size ="30"></p>
-        <p>詳細<input type="text" name="details" id="details" size ="30"></p>
-        <p>タグ
-        <select name="tag" id="tag">
-            <option value="VPP">VPP</option>
-            <option value="再エネ">再エネ</option>
-            <option value="リソース">リソース</option>
-        </select></p>
-        <p><input type="submit" id="submit" value ="登録"></p>
-    </form>
-    
-</div> -->
 
 <!-- <div class="sub"> 以下AJAX無しVer -->
 <h2>月別データを検索</h2>
