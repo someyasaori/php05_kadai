@@ -36,6 +36,11 @@
             退会：<input type="radio" name="life_flg" value="0" id="life_flg">
             入会：<input type="radio" name="life_flg" value="1" >
         </p>
+        <select name ="plan" id="plan">
+            <option value="tepco_standard">東京電力標準</option>
+            <option value="tepco_night8">東京電力夜間パック</option>
+        </select>
+
         <p class="centering"><input type="submit" id="submit" value="登録"></p>
     </form>
 

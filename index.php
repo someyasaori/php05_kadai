@@ -13,7 +13,7 @@
     <nav class="header-wrapper">
         <ul class="inner">
             <li><a href="user_index.php">ユーザー管理画面（管理者のみ）</a></li>
-            <li><a href="select_limited.php">ログインせずにリスト概要を見る</a></li>
+            <li><a href="user_detail_byuser.php">アカウント登録内容を修正</a></li>
             <li><a href="logout.php">ログアウト</a></li>
             <li><a href="login.php">ログイン</a></li>
         </ul>
@@ -24,8 +24,8 @@
 
 <!-- <div class="sub"> 以下AJAX無しVer -->
 <h2>月別データを検索</h2>
-<form method ="POST" action="select_limited.php">
-    <p class="date-wrapper">確認したい月を選ぶ（工事中）
+<form method ="POST" action="select.php">
+    <p class="date-wrapper">確認したい月を選ぶ
         <select id="year" name="year"></select>
         <select id="month" name="month"></select>
     </p>

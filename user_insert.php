@@ -17,14 +17,10 @@ $lpw = $_POST["lpw"];
 $hlpw = password_hash($lpw, PASSWORD_DEFAULT);//ハッシュ化
 $kanri_flg = $_POST["kanri_flg"];
 $life_flg = $_POST["life_flg"];
+$plan = $_POST["plan"];
 
 //DB接続
-// try {
-//     $pdo = new PDO('mysql:dbname=gs_db;charset=utf8;host=localhost','root','root');
-//   } catch (PDOException $e) {
-//     exit('DBConnectError:'.$e->getMessage());
-//   }
-//管理者のみが新規ユーザーを登録できる
+//管理者のみが権利権限含めたユーザー登録対応をできる
 if ($kanri == "1") {
 
     require_once('funcs.php');
@@ -32,8 +28,8 @@ if ($kanri == "1") {
 
 //データ登録（SQL文）
 $stmt = $pdo->prepare(
-    "INSERT INTO user_table(id,name,lid,lpw,kanri_flg,life_flg)
-    VALUES(NULL, :name, :lid, :lpw, :kanri_flg, :life_flg)"
+    "INSERT INTO user_table(id,name,lid,lpw,kanri_flg,life_flg,plan)
+    VALUES(NULL, :name, :lid, :lpw, :kanri_flg, :life_flg, :plan)"
 );
 
 //バインド変数
@@ -42,6 +38,7 @@ $stmt->bindValue(':lid', $lid, PDO::PARAM_STR);
 $stmt->bindValue(':lpw', $hlpw, PDO::PARAM_STR);
 $stmt->bindValue(':kanri_flg', $kanri_flg, PDO::PARAM_INT);
 $stmt->bindValue(':life_flg', $life_flg, PDO::PARAM_INT);
+$stmt->bindValue(':plan', $plan, PDO::PARAM_STR);
 
 //登録実行
 $status = $stmt->execute();

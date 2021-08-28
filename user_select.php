@@ -29,7 +29,7 @@ if ($status == false) {
     while ($result = $stmt->fetch(PDO::FETCH_ASSOC)) {
 
         $view .= "<tr>";
-        $view .= "<td>".h($result['name']).'</td><td>'.h($result['lid']).'</td><td>'.h($result['kanri_flg']).'</td><td>'.h($result['life_flg']).'</td><td>'.'<a href="user_detail.php?id='.$result['id'].'">'.'[編集]'.'</a>'.'</td><td>'.'<a href="user_delete.php?id='.$result['id'].'">'.'[削除]'.'</a>';
+        $view .= "<td>".h($result['name']).'</td><td>'.h($result['lid']).'</td><td>'.h($result['kanri_flg']).'</td><td>'.h($result['life_flg']).'</td><td>'.h($result['plan']).'</td><td>'.'<a href="user_detail.php?id='.$result['id'].'">'.'[編集]'.'</a>'.'</td><td>'.'<a href="user_delete.php?id='.$result['id'].'">'.'[削除]'.'</a>';
         $view .= "</tr>";
     }
 }   
@@ -59,6 +59,7 @@ if ($status == false) {
 	<th>ログインID</th>
 	<th>管理者ステータス</th>
 	<th>入・退会</th>
+    <th>電力メニュー</th>
     <th>編集</th>
     <th>削除</th>
     </tr>
