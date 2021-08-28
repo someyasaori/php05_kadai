@@ -30,6 +30,7 @@ if( password_verify($lpw, $val['lpw'])){
     $_SESSION['kanri_flg'] = $val['kanri_flg'];//SESSION変数に管理者権限のflagを保存
     $_SESSION['name']      = $val['name'];//SESSION変数にnameを保存
     $_SESSION['id']        = $val['id'];//SESSION変数に自動付与のidを保存（電気データ呼び出し用）
+    $_SESSION['plan']      = $val['plan'];//SESSION変数に電気メニューを保存（電気料金計算用）
     redirect('index.php');
   }else{
     //Login失敗時（失敗時はselect.phpの資料へのリンクがないバージョンを別途用意）

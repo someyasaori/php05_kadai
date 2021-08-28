@@ -23,6 +23,10 @@
 <h1>かしこく電気を使おう 目次</h1>
 
 <!-- <div class="sub"> 以下AJAX無しVer -->
+<h2>今月の概況</h2>
+<!-- 今月の累積使用量、今月の累積電気料金を表示するページに飛ぶ -->
+<p id="recent"><a href="summary.php">表示</a></p>
+
 <h2>月別データを検索</h2>
 <form method ="POST" action="select.php">
     <p class="date-wrapper">確認したい月を選ぶ

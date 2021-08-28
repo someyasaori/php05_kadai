@@ -1,4 +1,5 @@
 <?php
+
 //Sessionスタート
 session_start();
 
@@ -9,6 +10,10 @@ require_once('funcs.php');
 loginCheck();
 $user_name = $_SESSION['name'];
 $id = $_SESSION['id'];
+$plan = $_SESSION['plan'];
+
+echo $user_name;
+exit();
 
 //電力メニューと契約アンペアを取得
 
