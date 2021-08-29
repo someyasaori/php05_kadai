@@ -1,22 +1,16 @@
 <?php
-
 //Sessionスタート
 session_start();
 
 //関数を呼び出す
 require_once('funcs.php');
 
-//ログインチェック
+//ログインチェック、電力メニューと契約アンペアを取得
+
 loginCheck();
 $user_name = $_SESSION['name'];
 $id = $_SESSION['id'];
 $plan = $_SESSION['plan'];
-
-echo $user_name;
-exit();
-
-//電力メニューと契約アンペアを取得
-
 
 //以降はログインユーザーのみ
 
@@ -46,22 +40,21 @@ $end_month = date('Y-m-d 23:59:59', strtotime('last day of '. $input_month.'23:5
 $this_month = date('Y-m-d 00:00:00', strtotime('first day of this month'));
 $today = date('Y-m-d H:i:s', strtotime('now'));
 $stmt2 =$pdo->prepare 
-("SELECT SUM(wh/1000) as wh FROM $table_name WHERE plot_date_time BETWEEN '$this_month' AND '$today'");
+("SELECT SUM(wh) as wh FROM $table_name WHERE plot_date_time BETWEEN '$this_month' AND '$today'");
 $status = $stmt2->execute();
 if($row2 = $stmt2 -> fetch()){
     $wh_this_month = $row2['wh'];
     }
-    echo $wh_this_month;
-    exit();
+
 //基本料金取得
-$stmt11 =$pdo->prepare 
+$stmt11 = $pdo->prepare 
 ("SELECT fixed FROM tepco_standard WHERE plot_date_time = '00:00:00'");
 $status = $stmt11->execute();
 if($row11 = $stmt11 -> fetch()){
     $fixed = $row11['fixed'];
     }
  
-//従量料金単価（１段目）取得
+// 従量料金単価（１段目）取得
 $stmt12 =$pdo->prepare 
 ("SELECT var_s1 FROM tepco_standard WHERE plot_date_time = '00:00:00'");
 $status = $stmt12->execute();
@@ -71,7 +64,7 @@ if($row12 = $stmt12 -> fetch()){
 
 //従量料金単価（2段目）取得
 $stmt13 =$pdo->prepare 
-(" SELECT var_s2 FROM tepco_standard WHERE plot_date_time = '00:00:00' ");
+("SELECT var_s2 FROM tepco_standard WHERE plot_date_time = '00:00:00' ");
 $status = $stmt13->execute();
 if($row13 = $stmt13 -> fetch()){
     $var_s2 = $row13['var_s2'];
@@ -79,32 +72,22 @@ if($row13 = $stmt13 -> fetch()){
 
  //従量料金単価（3段目）取得
 $stmt14 =$pdo->prepare 
-(" SELECT var_s3 FROM tepco_standard WHERE plot_date_time = '00:00:00' ");
+("SELECT var_s3 FROM tepco_standard WHERE plot_date_time = '00:00:00' ");
 $status = $stmt14->execute();
 if($row14 = $stmt14 -> fetch()){
     $var_s3 = $row14['var_s3'];
     }
 
-//今月の電気代取得
-echo $wh_this_month;
-exit();
-let $this_month_bill = $fixed + $wh_this_month * $var_s1;
-echo $this_month_bill;
-exit();
 
+// //今月の電気代取得
 if ($wh_this_month < 120) {
-    $this_month_bill = $fixed + $wh_this_month * $var_s1
+    $this_month_bill = $fixed + $wh_this_month * $var_s1;
 } else if ($wh_this_month < 300){
-    $this_month_bill = $fixed + 120 * $var_s1 + ($wh_this_month-120) * $var_s2
+    $this_month_bill = $fixed + 120 * $var_s1 + ($wh_this_month-120) * $var_s2;
 } else {
-    $this_month_bill = $fixed + 120 * $var_s1 + (300 - 120) *$var_s2 +($wh_this_month-300) * $var_s3
+    $this_month_bill = $fixed + 120 * $var_s1 + (300 - 120) *$var_s2 +($wh_this_month-300) * $var_s3;
 };
- echo $this_month_bill;
- exit();
 
-// echo $this_month;
-// echo $today;
-// exit();
 
 //先月の合計
 // $last_month = date('Y-m-d', strtotime('first day of last month'));

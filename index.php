@@ -25,7 +25,7 @@
 <!-- <div class="sub"> 以下AJAX無しVer -->
 <h2>今月の概況</h2>
 <!-- 今月の累積使用量、今月の累積電気料金を表示するページに飛ぶ -->
-<p id="recent"><a href="summary.php">表示</a></p>
+<p id="summary_this month"><a href="summary.php">表示</a></p>
 
 <h2>月別データを検索</h2>
 <form method ="POST" action="select.php">
@@ -49,14 +49,11 @@
 <h2>直近3か月の電気使用料を比較</h2>
 <p id="recent"><a href="select.php">表示</a></p>
 <!-- <div id="view"></div> -->
-
 <!-- </div> -->
 <!-- </main> -->
-
 <!-- JQuery -->
 <script src="https://ajax.googleapis.com/ajax/libs/jquery/3.4.1/jquery.min.js"></script>
 <!-- JQuery -->
-
 <script>
 // 日付入力
 function ymd(start,end,id){//まずパッケージにする、引数とする要素を探す
@@ -69,8 +66,6 @@ let y = ""; //例) y += '<option value="'+i+'">'+i+'</option>';
 ymd(2020, 2030, "#year");
 ymd(1, 12, "#month");
 ymd(1, 31, "#date");
-
-
 //（未実装/AJAXが使いこなせず…）登録ボタンをクリック。Formの提出ではなくクリックイベントでAjax処理が行われる。
 $("#btn").on("click",function() {
             //Ajax送信開始
@@ -94,7 +89,6 @@ $("#btn").on("click",function() {
                   }
                 }
             });
-
         });
         
         //      }).done(function(data){
@@ -115,11 +109,7 @@ $("#btn").on("click",function() {
         //           }
         //         }
         //     });
-
         // });
-
-
 </script>
-
 </body>
 </html>

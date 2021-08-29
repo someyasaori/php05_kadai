@@ -12,6 +12,7 @@ $user_name = $_SESSION['name'];
 $id = $_SESSION['id'];
 $plan = $_SESSION['plan'];
 
+
 //電力メニューと契約アンペアを取得
 
 
