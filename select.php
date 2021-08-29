@@ -6,11 +6,11 @@ session_start();
 require_once('funcs.php');
 
 //ログインチェック、電力メニューと契約アンペアを取得
-
-loginCheck();
+// loginCheck();
 $user_name = $_SESSION['name'];
 $id = $_SESSION['id'];
 $plan = $_SESSION['plan'];
+$ampere = $_SESSION['ampere'];
 
 //以降はログインユーザーのみ
 
@@ -40,7 +40,7 @@ $end_month = date('Y-m-d 23:59:59', strtotime('last day of '. $input_month.'23:5
 $this_month = date('Y-m-d 00:00:00', strtotime('first day of this month'));
 $today = date('Y-m-d H:i:s', strtotime('now'));
 $stmt2 =$pdo->prepare 
-("SELECT SUM(wh) as wh FROM $table_name WHERE plot_date_time BETWEEN '$this_month' AND '$today'");
+("SELECT SUM(wh/1000) as wh FROM $table_name WHERE wh>0 AND plot_date_time BETWEEN '$this_month' AND '$today'");
 $status = $stmt2->execute();
 if($row2 = $stmt2 -> fetch()){
     $wh_this_month = $row2['wh'];
@@ -48,15 +48,15 @@ if($row2 = $stmt2 -> fetch()){
 
 //基本料金取得
 $stmt11 = $pdo->prepare 
-("SELECT fixed FROM tepco_standard WHERE plot_date_time = '00:00:00'");
+("SELECT fixed FROM $plan WHERE plot_date_time = '00:00:00'");
 $status = $stmt11->execute();
 if($row11 = $stmt11 -> fetch()){
     $fixed = $row11['fixed'];
     }
- 
+
 // 従量料金単価（１段目）取得
 $stmt12 =$pdo->prepare 
-("SELECT var_s1 FROM tepco_standard WHERE plot_date_time = '00:00:00'");
+("SELECT var_s1 FROM $plan WHERE plot_date_time = '00:00:00'");
 $status = $stmt12->execute();
 if($row12 = $stmt12 -> fetch()){
     $var_s1 = $row12['var_s1'];
@@ -64,7 +64,7 @@ if($row12 = $stmt12 -> fetch()){
 
 //従量料金単価（2段目）取得
 $stmt13 =$pdo->prepare 
-("SELECT var_s2 FROM tepco_standard WHERE plot_date_time = '00:00:00' ");
+("SELECT var_s2 FROM $plan WHERE plot_date_time = '00:00:00' ");
 $status = $stmt13->execute();
 if($row13 = $stmt13 -> fetch()){
     $var_s2 = $row13['var_s2'];
@@ -72,7 +72,7 @@ if($row13 = $stmt13 -> fetch()){
 
  //従量料金単価（3段目）取得
 $stmt14 =$pdo->prepare 
-("SELECT var_s3 FROM tepco_standard WHERE plot_date_time = '00:00:00' ");
+("SELECT var_s3 FROM $plan WHERE plot_date_time = '00:00:00' ");
 $status = $stmt14->execute();
 if($row14 = $stmt14 -> fetch()){
     $var_s3 = $row14['var_s3'];
@@ -81,11 +81,11 @@ if($row14 = $stmt14 -> fetch()){
 
 // //今月の電気代取得
 if ($wh_this_month < 120) {
-    $this_month_bill = $fixed + $wh_this_month * $var_s1;
+    $this_month_bill = $fixed/10 + $wh_this_month * $var_s1;
 } else if ($wh_this_month < 300){
-    $this_month_bill = $fixed + 120 * $var_s1 + ($wh_this_month-120) * $var_s2;
+    $this_month_bill = $fixed/10 + 120 * $var_s1 + ($wh_this_month-120) * $var_s2;
 } else {
-    $this_month_bill = $fixed + 120 * $var_s1 + (300 - 120) *$var_s2 +($wh_this_month-300) * $var_s3;
+    $this_month_bill = $fixed/10 + 120 * $var_s1 + (300 - 120) *$var_s2 +($wh_this_month-300) * $var_s3;
 };
 
 
@@ -99,7 +99,7 @@ if ($wh_this_month < 120) {
 $one_month_before = date('Y-m-d H:i:s', strtotime(date('Y-m-1') . '-1 month'));
 $end_month_one = date('Y-m-d 23:59:59', strtotime('last day of '. $one_month_before));
 
-$stmt3 =$pdo->prepare ("SELECT SUM(wh/1000) as wh FROM $table_name WHERE plot_date_time BETWEEN '$one_month_before' AND '$end_month_one' ");
+$stmt3 =$pdo->prepare ("SELECT SUM(wh/1000) as wh FROM $table_name WHERE wh>0 AND plot_date_time BETWEEN '$one_month_before' AND '$end_month_one' ");
 
 $status = $stmt3->execute();
 
@@ -116,7 +116,7 @@ if($row3 = $stmt3 -> fetch()){
 $two_month_before = date('Y-m-d H:i:s', strtotime(date('Y-m-1') . '-2 month'));
 $end_month_two = date('Y-m-d 23:59:59', strtotime('last day of '. $two_month_before));
 
-$stmt4 =$pdo->prepare ("SELECT SUM(wh/1000) as wh FROM $table_name WHERE plot_date_time BETWEEN '$two_month_before' AND '$end_month_two' ");
+$stmt4 =$pdo->prepare ("SELECT SUM(wh/1000) as wh FROM $table_name WHERE wh>0 AND plot_date_time BETWEEN '$two_month_before' AND '$end_month_two' ");
 $status = $stmt4->execute();
 
 if($row4 = $stmt4 -> fetch()){
@@ -133,7 +133,7 @@ if($row4 = $stmt4 -> fetch()){
 $three_month_before = date('Y-m-d H:i:s', strtotime(date('Y-m-1') . '-3 month'));
 $end_month_three = date('Y-m-d 23:59:59', strtotime('last day of '. $three_month_before));
 
-$stmt5 =$pdo->prepare ("SELECT SUM(wh/1000) as wh FROM $table_name WHERE plot_date_time BETWEEN '$three_month_before' AND '$end_month_three' ");
+$stmt5 =$pdo->prepare ("SELECT SUM(wh/1000) as wh FROM $table_name WHERE wh>0 AND plot_date_time BETWEEN '$three_month_before' AND '$end_month_three' ");
 $status = $stmt5->execute();
 
 if($row5 = $stmt5 -> fetch()){
@@ -142,13 +142,11 @@ if($row5 = $stmt5 -> fetch()){
 
 
 //指定した月毎の合計
-$stmt1 =$pdo->prepare ("SELECT SUM(wh) as wh FROM $table_name WHERE plot_date_time BETWEEN '$search_month' AND '$end_month' ");
+$stmt1 =$pdo->prepare ("SELECT SUM(wh/1000) as wh FROM $table_name WHERE wh>0 AND plot_date_time BETWEEN '$search_month' AND '$end_month' ");
 $status = $stmt1->execute();
 if($row1 = $stmt1 -> fetch()){
     $sum_selected_month = $row1['wh'];
     }
-
-
 
 
 //今月の電気料金（時間帯別単価の場合）
@@ -161,7 +159,7 @@ LEFT JOIN
     tepco_night8
 ON 
     DATE_FORMAT($table_name.plot_date_time, '%H:%i:%s') = DATE_FORMAT(tepco_night8.plot_date_time, '%H:%i:%s')
-WHERE
+WHERE wh>0 AND
 DATE_FORMAT($table_name.plot_date_time, '%Y-%m-%d %H:%i:%s')
 
 BETWEEN '$this_month' AND '$today'");
@@ -170,6 +168,7 @@ $status = $stmt9->execute();
 if($row9 = $stmt9 -> fetch()){
     $bill_this_month = $row9['bill'];
     }
+
 
 //先月の電気料金（時間帯別単価の場合）
 $stmt10 =$pdo->prepare 
@@ -181,7 +180,7 @@ LEFT JOIN
     tepco_night8 
 ON 
     DATE_FORMAT($table_name.plot_date_time, '%H:%i:%s') = DATE_FORMAT(tepco_night8.plot_date_time, '%H:%i:%s')
-WHERE
+WHERE wh>0 AND
 DATE_FORMAT($table_name.plot_date_time, '%Y-%m-%d %H:%i:%s')
 BETWEEN
 '$one_month_before' AND '$end_month_one'");
@@ -206,17 +205,19 @@ if($row10 = $stmt10 -> fetch()){
     <script src="https://cdnjs.cloudflare.com/ajax/libs/Chart.js/2.7.1/Chart.min.js"></script>
     <title>でんき料金サマリー</title>
 </head>
+
+<header>
+    <nav class="header-wrapper">
+        <ul class="inner">
+            <li><a href="index.php">トップに戻る</a></li>
+            <li><a href="logout.php">ログアウト</a></li>
+        </ul>
+    </nav>
+    <p class="return"></p>
+</header>
+
 <body>
 <h2>最近のでんきの使い方は？</h2>
-
-<!-- <table class="result">
-    <tr>
-    <th>時間</th>
-	<th>基本料金</th>
-	<th>従量料金1段目</th>
-    </tr>
-    <?= $view ?>
-</table> -->
 
 <canvas id="chart" height="100" width="200"></canvas>
 
@@ -241,10 +242,10 @@ let date = today.getDate();
 let latest_day = '<p>'+year+'/'+month+'/'+date+'</p>'; 
 $("#today").html(latest_day); 
 
-let this_month = '<?= $this_year ?>'+'/'+'<?= $this_month ?>'
-let one_month_before = '<?= $this_year ?>'+'/'+'<?= $one_month_before ?>'
-let two_month_before = '<?= $this_year ?>'+'/'+'<?= $two_month_before ?>'
-let three_month_before = '<?= $this_year ?>'+'/'+'<?= $three_month_before ?>'
+let this_month = year+'/'+ month;
+let one_month_before = year+'/'+ (month - 1);
+let two_month_before = year+'/'+ (month - 2);
+let three_month_before = year+'/'+ (month - 3);
 
 //Chart.jsで棒グラフを描く
 jQuery (function ()
