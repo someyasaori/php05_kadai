@@ -7,7 +7,7 @@ require_once('funcs.php');
 $pdo = db_conn();
 
 // //ログインチェック
-// loginCheck();
+loginCheck();
 $user_name = $_SESSION['name'];
 $id = $_SESSION['id'];
 
@@ -60,13 +60,14 @@ if ($status == false) {
             <option value="tepco_standard">東京電力標準</option>
             <option value="tepco_night8">東京電力夜間パック</option>
         </select>
+        <p class="centering">契約アンペア：<input type="text" name="ampere" value = "<?=$result['ampere']?>" id="ampere"></p>
         <p><input type="hidden" name ="id" value= "<?=$result['id']?>"></p>
         <p class="centering"><input type="submit" id="submit" value="登録"></p>
     </form>
 <p class="all">
-    <a href="user_select.php">登録済みユーザーを表示（編集・削除もこちら）</a>
+    <!-- <a href="user_select.php">登録済みユーザーを表示（編集・削除もこちら）</a>
     <br>
-    <a href="user_index.php">新規登録画面</a>
+    <a href="user_index.php">新規登録画面</a> -->
     <a href="index.php">目次に戻る</a>
 </p>
 

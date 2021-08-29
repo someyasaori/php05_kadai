@@ -40,7 +40,7 @@
             <option value="tepco_standard">東京電力標準</option>
             <option value="tepco_night8">東京電力夜間パック</option>
         </select>
-
+        <p class="centering">契約アンペア：<input type="text" name="ampere" id="ampere"></p>
         <p class="centering"><input type="submit" id="submit" value="登録"></p>
     </form>
 
