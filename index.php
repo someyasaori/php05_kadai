@@ -14,6 +14,7 @@
         <ul class="inner">
             <li><a href="user_index.php">ユーザー管理画面（管理者のみ）</a></li>
             <li><a href="user_detail_byuser.php">アカウント登録内容を修正</a></li>
+            <li><a href="user_index.php">新規アカウント登録</a></li>
             <li><a href="logout.php">ログアウト</a></li>
             <li><a href="login.php">ログイン</a></li>
         </ul>

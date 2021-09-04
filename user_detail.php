@@ -37,8 +37,8 @@ if ($status == false) {
     <h2>既存ユーザー編集</h2>
     <form method="POST" action="user_update.php">
         <p class="centering">名前：<input type="text" name ="name" value = "<?=$result['name']?>" id="name"></p>
-        <p class="centering">ログインID：<input type="text" name="lid" value = "<?=$result['lid']?>" id="lid"></p>
-        <p class="centering">ログインPW：<input type="text" name="lpw"></p>
+        <p class="centering">ID：<input type="text" name="lid" value = "<?=$result['lid']?>" id="lid"></p>
+        <p class="centering">パスワード：<input type="text" name="lpw"></p>
         
         <p class="kanri">
             一般<input type="radio" name="kanri_flg" value = "0" <?php if($result['kanri_flg'] == '0') echo 'checked="checked"'?> id="kanri_flg">
@@ -51,8 +51,19 @@ if ($status == false) {
         <select name ="plan" id="plan" value = "<?=$result['plan']?>">
             <option value="tepco_standard">東京電力標準</option>
             <option value="tepco_night8">東京電力夜間パック</option>
+            <option value="kddi">auでんき</option>
+            <option value="softbank">ソフトバンクでんき</option>
+            <option value="tokyogas">東京ガス</option>
+            <option value="rakuten">楽天でんき</option>
+            <option value="ENEOS">ENEOSでんき</option>
+            <option value="looop">looopでんき</option>
         </select>
         <p class="centering">契約アンペア：<input type="text" name="ampere" value = "<?=$result['ampere']?>" id="ampere"></p>
+        <p>データ粒度</p>
+        <select name ="polling" id="polling" value = "<?=$result['polling']?>">
+            <option value="30min">30分値</option>
+            <option value="1min">1分値</option>
+        </select>
         <p><input type="hidden" name ="id" value= "<?=$result['id']?>"></p>
         <p class="centering"><input type="submit" id="submit" value="登録"></p>
     </form>

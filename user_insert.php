@@ -19,6 +19,7 @@ $kanri_flg = $_POST["kanri_flg"];
 $life_flg = $_POST["life_flg"];
 $plan = $_POST["plan"];
 $ampere = $_POST["ampere"];
+$polling = $_POST["polling"];
 
 //DB接続
 //管理者のみが権利権限含めたユーザー登録対応をできる→この必要はない？一旦コメントアウト
@@ -29,8 +30,8 @@ $pdo = db_conn();
 
 //データ登録（SQL文）
 $stmt = $pdo->prepare(
-    "INSERT INTO user_table(id,name, lid, lpw, kanri_flg, life_flg, plan, ampere)
-    VALUES(NULL, :name, :lid, :lpw, :kanri_flg, :life_flg, :plan, :ampere)"
+    "INSERT INTO user_table(id,name, lid, lpw, kanri_flg, life_flg, plan, ampere, polling)
+    VALUES(NULL, :name, :lid, :lpw, :kanri_flg, :life_flg, :plan, :ampere, :polling)"
 );
 
 //バインド変数
@@ -41,6 +42,7 @@ $stmt->bindValue(':kanri_flg', $kanri_flg, PDO::PARAM_INT);
 $stmt->bindValue(':life_flg', $life_flg, PDO::PARAM_INT);
 $stmt->bindValue(':plan', $plan, PDO::PARAM_STR);
 $stmt->bindValue(':ampere', $ampere, PDO::PARAM_INT);
+$stmt->bindValue(':polling', $polling, PDO::PARAM_STR);
 
 //登録実行
 $status = $stmt->execute();
