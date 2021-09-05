@@ -43,7 +43,7 @@
             <option value="softbank">ソフトバンクでんき</option>
             <option value="tokyogas">東京ガス</option>
             <option value="rakuten">楽天でんき</option>
-            <option value="ENEOS">ENEOSでんき</option>
+            <option value="eneos">ENEOSでんき</option>
             <option value="looop">looopでんき</option>
         </select>
         <p class="centering">契約アンペア：<input type="text" name="ampere" id="ampere"></p>

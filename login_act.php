@@ -34,7 +34,7 @@ if( password_verify($lpw, $val['lpw'])){
     $_SESSION['ampere']    = $val['ampere'];//SESSION変数に契約アンペアを保存（電気料金計算用）
     $_SESSION['polling']    = $val['polling'];//SESSION変数に契約データ粒度を保存（電気使用量計算用）
     redirect('index.php');
-  }else{
+  } else {
     //Login失敗時（失敗時はselect.phpの資料へのリンクがないバージョンを別途用意）
     redirect('login.php');
 }

@@ -38,7 +38,7 @@ $stmt11 = $pdo->prepare
 ("SELECT fixed FROM $plan WHERE plot_date_time = '00:00:00'");
 $status = $stmt11->execute();
 if($row11 = $stmt11 -> fetch()){
-    $fixed = $row11['fixed'];
+    $fixed = $row11['fixed'] * ($ampere/10);
     }
 
 // 従量料金単価（１段目）取得
@@ -99,19 +99,12 @@ if($row1 = $stmt1 -> fetch()){
 
 $wh_selected_month_r = round ($wh_selected_month);
 
-// 指定した月の電気代取得
-if ($wh_selected_month < 120) {
-    $selected_month_bill = round($fixed/10 + $wh_selected_month * $var_s1);
-} else if ($wh_selected_month < 300){
-    $selected_month_bill = round($fixed/10 + 120 * $var_s1 + ($wh_selected_month-120) * $var_s2);
-} else {
-    $selected_month_bill = round($fixed/10 + 120 * $var_s1 + (300 - 120) *$var_s2 +($wh_selected_month-300) * $var_s3);
-}
-
-//指定した月の電気料金（時間帯別単価の場合）
+//時間帯別料金との分岐点
+if ($plan == "tepco_night8"){
+    //指定した月の電気料金（時間帯別単価の場合）
 $stmt9 =$pdo->prepare 
 ("SELECT 
-   sum(tepco_night8.var_s1 * $table_name.wh/(1000*60)) AS bill
+   sum(tepco_night8.var_s1 * $table_name.wh/1000/60) AS bill
 FROM
 	$table_name
 LEFT JOIN 
@@ -125,7 +118,29 @@ BETWEEN '$search_month' AND '$end_month'");
 
 $status = $stmt9->execute();
 if($row9 = $stmt9 -> fetch()){
-    $selected_month_bill = $row9['bill'];
+    $selected_month_bill = round($row9['bill']+ $fixed);
+    }
+} else {
+
+// 指定した月の電気代取得
+//東京ガスは従量バーが違う
+    if($plan =="tokyogas"){
+            if ($wh_selected_month < 140) {
+                $selected_month_bill = round($fixed + $wh_selected_month * $var_s1);
+            } else if ($wh_selected_month < 350){
+                $selected_month_bill = round($fixed + 140 * $var_s1 + ($wh_selected_month-140) * $var_s2);
+            } else {
+                $selected_month_bill = round($fixed + 140 * $var_s1 + (350 - 140) *$var_s2 +($wh_selected_month-350) * $var_s3);
+            }
+        } else {
+            if ($wh_selected_month < 120) {
+                $selected_month_bill = round($fixed + $wh_selected_month * $var_s1);
+            } else if ($wh_selected_month < 300){
+                $selected_month_bill = round($fixed + 120 * $var_s1 + ($wh_selected_month-120) * $var_s2);
+            } else {
+                $selected_month_bill = round($fixed + 120 * $var_s1 + (300 - 120) *$var_s2 +($wh_selected_month-300) * $var_s3);
+            }
+        }
     }
 
 ?>
