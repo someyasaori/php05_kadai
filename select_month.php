@@ -11,6 +11,7 @@ $user_name = $_SESSION['name'];
 $id = $_SESSION['id'];
 $plan = $_SESSION['plan'];
 $ampere = $_SESSION['ampere'];
+$polling = $_SESSION['polling'];
 
 //以降はログインユーザーのみ
 
@@ -30,29 +31,7 @@ $input_month = $year.'-'.$month.'-'.'1';
 $search_month = date('Y-m-d 00:00:00', strtotime($input_month));
 $end_month = date('Y-m-d 23:59:59', strtotime('last day of '. $input_month.'23:59:59'));
 
-//ログインした人のデータが登録されているテーブル全て
-// $stmt = $pdo->prepare("SELECT * FROM $table_name");
-
 //ログインした人のデータが登録されているテーブルから検索条件に当てはまるものを探す
-
-
-//今月の使用量合計
-$this_month = date('Y-m-d 00:00:00', strtotime('first day of this month'));
-$today = date('Y-m-d H:i:s', strtotime('now'));
-$stmt2 =$pdo->prepare 
-("SELECT SUM(wh/1000) as wh FROM $table_name WHERE wh>0 AND plot_date_time BETWEEN '$this_month' AND '$today'");
-$status = $stmt2->execute();
-if($row2 = $stmt2 -> fetch()){
-    $wh_this_month = $row2['wh'];
-    }
-
-//１分値の場合
-$stmt20 =$pdo->prepare 
-("SELECT sum(wh/1000/60) as wh FROM $table_name WHERE wh>0 AND plot_date_time BETWEEN '$this_month' AND '$today'");
-$status = $stmt20->execute();
-if($row20 = $stmt20 -> fetch()){
-    $wh_this_month_r = $row20['wh'];
-    }
 
 //基本料金取得
 $stmt11 = $pdo->prepare 
@@ -87,80 +66,52 @@ if($row14 = $stmt14 -> fetch()){
     }
 
 
-// //今月の電気代取得
-if ($wh_this_month < 120) {
-    $this_month_bill = $fixed/10 + $wh_this_month * $var_s1;
-} else if ($wh_this_month < 300){
-    $this_month_bill = $fixed/10 + 120 * $var_s1 + ($wh_this_month-120) * $var_s2;
+//指定した月の日別の合計値の取得（1分値と30分値で計算式を分ける）
+$daily_sum = array();
+if($polling == "1min"){
+    $stmt = $pdo->prepare ("SELECT DATE_FORMAT(plot_date_time, '%Y-%m-%d') AS plot_date_time, SUM(wh/(1000*60)) AS daily_wh FROM $table_name WHERE wh>0 AND plot_date_time BETWEEN '$search_month' AND '$end_month' GROUP BY DATE_FORMAT(plot_date_time, '%Y-%m-%d') ");  
+} else if ($polling == "30min"){
+        $stmt = $pdo->prepare ("SELECT DATE_FORMAT(plot_date_time, '%Y-%m-%d') AS plot_date_time, SUM(wh/1000) AS daily_wh FROM $table_name WHERE wh>0 AND plot_date_time BETWEEN '$search_month' AND '$end_month' GROUP BY DATE_FORMAT(plot_date_time, '%Y-%m-%d') ");
 } else {
-    $this_month_bill = $fixed/10 + 120 * $var_s1 + (300 - 120) *$var_s2 +($wh_this_month-300) * $var_s3;
-};
-
-
-//先月の合計
-// $last_month = date('Y-m-d', strtotime('first day of last month'));
-// $end_of_last_month = date('Y-m-d H:i:s', strtotime('last day of '. $last_month.'23:59:59'));
-// $this_this_month = date('m', strtotime('this month')) ;
-// $this_year =  date('Y', strtotime('this month')) ;
-// $one_month_before= $this_this_month - 1;
-// $month_one  = $this_year.'-'.$one_month_before.'-'.'1';
-$one_month_before = date('Y-m-d H:i:s', strtotime(date('Y-m-1') . '-1 month'));
-$end_month_one = date('Y-m-d 23:59:59', strtotime('last day of '. $one_month_before));
-
-$stmt3 =$pdo->prepare ("SELECT SUM(wh/1000) as wh FROM $table_name WHERE wh>0 AND plot_date_time BETWEEN '$one_month_before' AND '$end_month_one' ");
-
-$status = $stmt3->execute();
-
-if($row3 = $stmt3 -> fetch()){
-    $wh_last_month = $row3['wh'];
+        exit ("データ粒度を登録してください");
     }
 
-
-//2か月前の合計
-// $two_month_before= $this_this_month - 2;
-// $month_two  = $this_year.'-'.$two_month_before.'-'.'1';
-// $end_month_two = date('Y-m-d H:i:s', strtotime('last day of '. $month_two.'23:59:59'));
-
-$two_month_before = date('Y-m-d H:i:s', strtotime(date('Y-m-1') . '-2 month'));
-$end_month_two = date('Y-m-d 23:59:59', strtotime('last day of '. $two_month_before));
-
-$stmt4 =$pdo->prepare ("SELECT SUM(wh/1000) as wh FROM $table_name WHERE wh>0 AND plot_date_time BETWEEN '$two_month_before' AND '$end_month_two' ");
-$status = $stmt4->execute();
-
-if($row4 = $stmt4 -> fetch()){
-    $wh_two_month_before = $row4['wh'];
+$status = $stmt->execute();
+if ($status == false) {
+    sql_error($status);
+} else {
+    $daily_sum = $stmt->fetchAll();
     }
 
-//3か月前の合計
-// $this_month = date('m', strtotime('this month')) ;
-// $this_year =  date('Y', strtotime('this month')) ;
-// $three_month_before= $this_this_month - 3;
-// $month_three  = $this_year.'-'.$three_month_before.'-'.'1';
-// $end_month_three = date('Y-m-d H:i:s', strtotime('last day of '. $month_three.'23:59:59'));
-
-$three_month_before = date('Y-m-d H:i:s', strtotime(date('Y-m-1') . '-3 month'));
-$end_month_three = date('Y-m-d 23:59:59', strtotime('last day of '. $three_month_before));
-
-$stmt5 =$pdo->prepare ("SELECT SUM(wh/1000) as wh FROM $table_name WHERE wh>0 AND plot_date_time BETWEEN '$three_month_before' AND '$end_month_three' ");
-$status = $stmt5->execute();
-
-if($row5 = $stmt5 -> fetch()){
-    $wh_three_month_before = $row5['wh'];
-    }
-
+//配列をJSON形式に変更    
+$json_array = json_encode($daily_sum);
 
 //指定した月毎の合計
-$stmt1 =$pdo->prepare ("SELECT SUM(wh/1000) as wh FROM $table_name WHERE wh>0 AND plot_date_time BETWEEN '$search_month' AND '$end_month' ");
+if($polling == "1min")
+    {$stmt1 =$pdo->prepare ("SELECT SUM(wh/1000/60) as wh FROM $table_name WHERE wh>0 AND plot_date_time BETWEEN '$search_month' AND '$end_month' ");
+} else {
+    $stmt1 =$pdo->prepare ("SELECT SUM(wh/1000) as wh FROM $table_name WHERE wh>0 AND plot_date_time BETWEEN '$search_month' AND '$end_month' ");
+}
 $status = $stmt1->execute();
 if($row1 = $stmt1 -> fetch()){
-    $sum_selected_month = $row1['wh'];
+    $wh_selected_month = $row1['wh'];
     }
 
+$wh_selected_month_r = round ($wh_selected_month);
 
-//今月の電気料金（時間帯別単価の場合）
+// 指定した月の電気代取得
+if ($wh_selected_month < 120) {
+    $selected_month_bill = round($fixed/10 + $wh_selected_month * $var_s1);
+} else if ($wh_selected_month < 300){
+    $selected_month_bill = round($fixed/10 + 120 * $var_s1 + ($wh_selected_month-120) * $var_s2);
+} else {
+    $selected_month_bill = round($fixed/10 + 120 * $var_s1 + (300 - 120) *$var_s2 +($wh_selected_month-300) * $var_s3);
+}
+
+//指定した月の電気料金（時間帯別単価の場合）
 $stmt9 =$pdo->prepare 
 ("SELECT 
-   sum(tepco_night8.var_s1 * $table_name.wh/(2*1000)) AS bill
+   sum(tepco_night8.var_s1 * $table_name.wh/(1000*60)) AS bill
 FROM
 	$table_name
 LEFT JOIN 
@@ -170,35 +121,12 @@ ON
 WHERE wh>0 AND
 DATE_FORMAT($table_name.plot_date_time, '%Y-%m-%d %H:%i:%s')
 
-BETWEEN '$this_month' AND '$today'");
+BETWEEN '$search_month' AND '$end_month'");
 
 $status = $stmt9->execute();
 if($row9 = $stmt9 -> fetch()){
-    $bill_this_month = $row9['bill'];
+    $selected_month_bill = $row9['bill'];
     }
-
-
-//先月の電気料金（時間帯別単価の場合）
-$stmt10 =$pdo->prepare 
-("SELECT 
-   sum(tepco_night8.var_s1 * $table_name.wh/(2*1000)) AS bill
-FROM
-	$table_name
-LEFT JOIN 
-    tepco_night8 
-ON 
-    DATE_FORMAT($table_name.plot_date_time, '%H:%i:%s') = DATE_FORMAT(tepco_night8.plot_date_time, '%H:%i:%s')
-WHERE wh>0 AND
-DATE_FORMAT($table_name.plot_date_time, '%Y-%m-%d %H:%i:%s')
-BETWEEN
-'$one_month_before' AND '$end_month_one'");
-
-$status = $stmt10->execute();
-
-if($row10 = $stmt10 -> fetch()){
-    $bill_last_month = $row10['bill'];
-    }
-
 
 ?>
 
@@ -226,40 +154,62 @@ if($row10 = $stmt10 -> fetch()){
 </header>
 
 <body>
-<h2>最近のでんきの使い方は？</h2>
+<h2><?= $year?>年<?= $month?>月のでんきの使い方は？</h2>
 
-<canvas id="chart" height="100" width="200"></canvas>
+    <table border =1>
+        <tr>
+            <th><?= $year?>年<?= $month?>月の電気料金
+                <th> <?= $selected_month_bill ?> 円</th>
+            </th>   
+        </tr>
+    </table>
 
-<p><span id="today"></span>までの電気料金： <?= $bill_this_month ?></p>
-<p>先月の電気料金： <?= $bill_last_month ?></p>
+    <table border =1>
+        <tr>
+            <th><?= $year?>年<?= $month?>月の電気使用量
+                <th> <?= $wh_selected_month_r ?> kWh</th>
+            </th>   
+        </tr>
+    </table>
 
-<p class="return"><a href="index.php">トップに戻る</a></p>
-
-
-
+        <canvas id="chart" height="100" width="200"></canvas>
+    
 <!-- JQuery -->
-<script src="https://ajax.googleapis.com/ajax/libs/jquery/3.4.1/jquery.min.js"></script>
+    <script src="https://ajax.googleapis.com/ajax/libs/jquery/3.4.1/jquery.min.js"></script>
 <!-- JQuery -->
-
+    
 <script>
-
+    
 //年月表示の整理
 let today = new Date();
 let year = today.getFullYear();
 let month =today.getMonth()+1;
-let date = today.getDate();
+ let date = today.getDate();
 let latest_day = '<p>'+year+'/'+month+'/'+date+'</p>'; 
 $("#today").html(latest_day); 
-
+    
 let this_month = year+'/'+ month;
 let one_month_before = year+'/'+ (month - 1);
 let two_month_before = year+'/'+ (month - 2);
 let three_month_before = year+'/'+ (month - 3);
+    
+let js_array = <?php echo $json_array; ?>;
+console.log(js_array);
+
+date_array = [];
+kwh_array = [];
+for(key in js_array){
+ date_array.push(js_array[key][0]);
+kwh_array.push(js_array[key][1]);
+}
+console.log(date_array);
+console.log(kwh_array);
+ 
 
 //Chart.jsで棒グラフを描く
 jQuery (function ()
 {const config = {
-        type: 'bar',
+        type: 'line',
         data: barChartData,
         responsive : true
         }
@@ -269,12 +219,12 @@ jQuery (function ()
 })
 
 const barChartData = {
-    labels : [three_month_before, two_month_before, one_month_before, this_month],
+    labels : date_array,
     datasets : [
         {
-        label: "電気使用量(kWh)",
+        label: "日別電気使用量(kWh)",
         backgroundColor: "rgba(60,179,113,0.5)",
-        data : [<?= $wh_three_month_before ?>,<?= $wh_two_month_before ?>,<?= $wh_last_month ?>,<?= $wh_this_month ?>]
+        data : kwh_array
         },   
     ]
 }

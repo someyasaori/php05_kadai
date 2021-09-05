@@ -11,13 +11,9 @@ $user_name = $_SESSION['name'];
 $id = $_SESSION['id'];
 $plan = $_SESSION['plan'];
 $ampere = $_SESSION['ampere'];
+$polling = $_SESSION['polling'];
 
 //以降はログインユーザーのみ
-
-//検索条件取得
-$year =$_POST["year"];
-$month = $_POST["month"];
-// $date = $_POST["date"];
 
 //DB接続（電力量データ）
 $pdo = db_conn(); 
@@ -25,34 +21,26 @@ $pdo = db_conn();
 //IDと一致するテーブル名を作成する
 $table_name = "id".$id;
 
-//検索に用いる日時（月初と月末）を定義する
-$input_month = $year.'-'.$month.'-'.'1';
-$search_month = date('Y-m-d 00:00:00', strtotime($input_month));
-$end_month = date('Y-m-d 23:59:59', strtotime('last day of '. $input_month.'23:59:59'));
-
-//ログインした人のデータが登録されているテーブル全て
-// $stmt = $pdo->prepare("SELECT * FROM $table_name");
-
-//ログインした人のデータが登録されているテーブルから検索条件に当てはまるものを探す
-
-
-//今月の使用量合計
+//今月の今日時点までの定義
 $this_month = date('Y-m-d 00:00:00', strtotime('first day of this month'));
 $today = date('Y-m-d H:i:s', strtotime('now'));
-$stmt2 =$pdo->prepare 
-("SELECT SUM(wh/1000) as wh FROM $table_name WHERE wh>0 AND plot_date_time BETWEEN '$this_month' AND '$today'");
-$status = $stmt2->execute();
-if($row2 = $stmt2 -> fetch()){
-    $wh_this_month = $row2['wh'];
-    }
 
-//１分値の場合
-$stmt20 =$pdo->prepare 
-("SELECT sum(wh/1000/60) as wh FROM $table_name WHERE wh>0 AND plot_date_time BETWEEN '$this_month' AND '$today'");
-$status = $stmt20->execute();
-if($row20 = $stmt20 -> fetch()){
-    $wh_this_month_r = $row20['wh'];
+//今月の使用量合計（1分値と30分値で計算式を分ける）
+if($polling == '1min'){
+    $stmt2 =$pdo->prepare 
+    ("SELECT SUM(wh/1000/60) as monthly_wh FROM $table_name WHERE wh>0 AND plot_date_time BETWEEN '$this_month' AND '$today'");
+    } else if ($polling == '30min'){
+        $stmt2 =$pdo->prepare 
+    ("SELECT SUM(wh/1000) as monthly_wh FROM $table_name WHERE wh>0 AND plot_date_time BETWEEN '$this_month' AND '$today'");
+    } else {
+        exit ("データ粒度を登録してください");
     }
+    
+    $status = $stmt2->execute();
+    if($row2 = $stmt2 -> fetch()){
+        $wh_this_month = $row2['monthly_wh'];
+        }
+    $wh_this_month_r = round($wh_this_month);
 
 //基本料金取得
 $stmt11 = $pdo->prepare 
@@ -106,15 +94,18 @@ if ($wh_this_month < 120) {
 // $month_one  = $this_year.'-'.$one_month_before.'-'.'1';
 $one_month_before = date('Y-m-d H:i:s', strtotime(date('Y-m-1') . '-1 month'));
 $end_month_one = date('Y-m-d 23:59:59', strtotime('last day of '. $one_month_before));
-
-$stmt3 =$pdo->prepare ("SELECT SUM(wh/1000) as wh FROM $table_name WHERE wh>0 AND plot_date_time BETWEEN '$one_month_before' AND '$end_month_one' ");
-
+if($polling == "1min"){
+    $stmt3 =$pdo->prepare ("SELECT SUM(wh/1000/60) as wh FROM $table_name WHERE wh>0 AND plot_date_time BETWEEN '$one_month_before' AND '$end_month_one' ");
+} else {
+    $stmt3 =$pdo->prepare ("SELECT SUM(wh/1000) as wh FROM $table_name WHERE wh>0 AND plot_date_time BETWEEN '$one_month_before' AND '$end_month_one' ");
+}
 $status = $stmt3->execute();
 
 if($row3 = $stmt3 -> fetch()){
     $wh_last_month = $row3['wh'];
     }
 
+$wh_last_month_r = round($wh_last_month);
 
 //2か月前の合計
 // $two_month_before= $this_this_month - 2;
@@ -123,10 +114,13 @@ if($row3 = $stmt3 -> fetch()){
 
 $two_month_before = date('Y-m-d H:i:s', strtotime(date('Y-m-1') . '-2 month'));
 $end_month_two = date('Y-m-d 23:59:59', strtotime('last day of '. $two_month_before));
+if($polling == "1min"){
+$stmt4 =$pdo->prepare ("SELECT SUM(wh/1000/60) as wh FROM $table_name WHERE wh>0 AND plot_date_time BETWEEN '$two_month_before' AND '$end_month_two' ");
+    } else {
+        $stmt4 =$pdo->prepare("SELECT SUM(wh/1000) as wh FROM $table_name WHERE wh>0 AND plot_date_time BETWEEN '$two_month_before' AND '$end_month_two' ");
+}
 
-$stmt4 =$pdo->prepare ("SELECT SUM(wh/1000) as wh FROM $table_name WHERE wh>0 AND plot_date_time BETWEEN '$two_month_before' AND '$end_month_two' ");
 $status = $stmt4->execute();
-
 if($row4 = $stmt4 -> fetch()){
     $wh_two_month_before = $row4['wh'];
     }
@@ -140,21 +134,17 @@ if($row4 = $stmt4 -> fetch()){
 
 $three_month_before = date('Y-m-d H:i:s', strtotime(date('Y-m-1') . '-3 month'));
 $end_month_three = date('Y-m-d 23:59:59', strtotime('last day of '. $three_month_before));
-
+if($polling == "1min"){
+$stmt5 =$pdo->prepare ("SELECT SUM(wh/1000/60) as wh FROM $table_name WHERE wh>0 AND plot_date_time BETWEEN '$three_month_before' AND '$end_month_three' ");
+} else {
 $stmt5 =$pdo->prepare ("SELECT SUM(wh/1000) as wh FROM $table_name WHERE wh>0 AND plot_date_time BETWEEN '$three_month_before' AND '$end_month_three' ");
+}
 $status = $stmt5->execute();
 
 if($row5 = $stmt5 -> fetch()){
     $wh_three_month_before = $row5['wh'];
     }
 
-
-//指定した月毎の合計
-$stmt1 =$pdo->prepare ("SELECT SUM(wh/1000) as wh FROM $table_name WHERE wh>0 AND plot_date_time BETWEEN '$search_month' AND '$end_month' ");
-$status = $stmt1->execute();
-if($row1 = $stmt1 -> fetch()){
-    $sum_selected_month = $row1['wh'];
-    }
 
 
 //今月の電気料金（時間帯別単価の場合）

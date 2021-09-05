@@ -13,6 +13,7 @@ $plan = $_SESSION['plan'];
 $ampere = $_SESSION['ampere'];
 $polling = $_SESSION['polling'];
 
+
 //以降はログインユーザーのみ
 
 //DB接続（電力量データ）
@@ -27,10 +28,12 @@ $today = date('Y-m-d H:i:s', strtotime('now'));
 
 //日別の合計値の取得（1分値と30分値で計算式を分ける）
 $daily_sum = array();
-if($polling = "1min"){
-    $stmt = $pdo->prepare ("SELECT DATE_FORMAT(plot_date_time, '%Y-%m-%d') AS plot_date_time, SUM(wh/1000/60) AS daily_wh FROM $table_name WHERE wh>0 AND plot_date_time BETWEEN '$this_month' AND '$today' GROUP BY DATE_FORMAT(plot_date_time, '%Y-%m-%d') ");  
-} else {
+if($polling == "1min"){
+    $stmt = $pdo->prepare ("SELECT DATE_FORMAT(plot_date_time, '%Y-%m-%d') AS plot_date_time, SUM(wh/(1000*60)) AS daily_wh FROM $table_name WHERE wh>0 AND plot_date_time BETWEEN '$this_month' AND '$today' GROUP BY DATE_FORMAT(plot_date_time, '%Y-%m-%d') ");  
+} else if ($polling == "30min"){
         $stmt = $pdo->prepare ("SELECT DATE_FORMAT(plot_date_time, '%Y-%m-%d') AS plot_date_time, SUM(wh/1000) AS daily_wh FROM $table_name WHERE wh>0 AND plot_date_time BETWEEN '$this_month' AND '$today' GROUP BY DATE_FORMAT(plot_date_time, '%Y-%m-%d') ");
+    } else {
+        exit ("データ粒度を登録してください");
     }
 
 $status = $stmt->execute();
@@ -40,18 +43,18 @@ if ($status == false) {
     $daily_sum = $stmt->fetchAll();
     }
 
-
 //配列をJSON形式に変更    
 $json_array = json_encode($daily_sum);
 
 //今月の使用量合計（1分値と30分値で計算式を分ける）
-if($polling = "1min"){
+if($polling == "1min"){
+$stmt2 =$pdo->prepare 
+("SELECT SUM(wh/1000/60) as monthly_wh FROM $table_name WHERE wh>0 AND plot_date_time BETWEEN '$this_month' AND '$today'");
+} else {
     $stmt2 =$pdo->prepare 
-    ("SELECT SUM(wh/1000/60) as monthly_wh FROM $table_name WHERE wh>0 AND plot_date_time BETWEEN '$this_month' AND '$today'");
-} else if{
-    $stmt2 =$pdo->prepare 
-    ("SELECT SUM(wh/1000) as monthly_wh FROM $table_name WHERE wh>0 AND plot_date_time BETWEEN '$this_month' AND '$today'");
-    }
+("SELECT SUM(wh/1000) as monthly_wh FROM $table_name WHERE wh>0 AND plot_date_time BETWEEN '$this_month' AND '$today'");
+}
+
 $status = $stmt2->execute();
 if($row2 = $stmt2 -> fetch()){
     $wh_this_month = $row2['monthly_wh'];
@@ -99,7 +102,7 @@ if ($wh_this_month < 120) {
     $this_month_bill = round($fixed/10 + 120 * $var_s1 + (300 - 120) *$var_s2 +($wh_this_month-300) * $var_s3);
 }
 
- //今月の電気料金（時間帯別単価の場合）
+//今月の電気料金（時間帯別単価の場合）
 $stmt9 =$pdo->prepare 
 ("SELECT 
    sum(tepco_night8.var_s1 * $table_name.wh/(1000*60)) AS bill
@@ -111,7 +114,6 @@ ON
     DATE_FORMAT($table_name.plot_date_time, '%H:%i:%s') = DATE_FORMAT(tepco_night8.plot_date_time, '%H:%i:%s')
 WHERE wh>0 AND 
 DATE_FORMAT($table_name.plot_date_time, '%Y-%m-%d %H:%i:%s')
-
 BETWEEN '$this_month' AND '$today'");
 
 $status = $stmt9->execute();
@@ -122,10 +124,9 @@ if($row9 = $stmt9 -> fetch()){
 //先月の使用量合計
 $one_month_before = date('Y-m-d H:i:s', strtotime(date('Y-m-1') . '-1 month'));
 $end_month_one = date('Y-m-d 23:59:59', strtotime('last day of '. $one_month_before));
-
-if($polling = "1min"){
+if($polling == "1min"){
     $stmt3 =$pdo->prepare ("SELECT SUM(wh/1000/60) as wh FROM $table_name WHERE wh>0 AND plot_date_time BETWEEN '$one_month_before' AND '$end_month_one' ");
-} else if{
+} else {
     $stmt3 =$pdo->prepare ("SELECT SUM(wh/1000) as wh FROM $table_name WHERE wh>0 AND plot_date_time BETWEEN '$one_month_before' AND '$end_month_one' ");
 }
 $status = $stmt3->execute();
@@ -165,7 +166,6 @@ $status = $stmt10->execute();
 if($row10 = $stmt10 -> fetch()){
     $bill_last_month = $row10['bill'];
     }
-    
 ?>
 
 
