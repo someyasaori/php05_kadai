@@ -32,6 +32,7 @@ if( password_verify($lpw, $val['lpw'])){
     $_SESSION['id']        = $val['id'];//SESSION変数に自動付与のidを保存（電気データ呼び出し用）
     $_SESSION['plan']      = $val['plan'];//SESSION変数に電気メニューを保存（電気料金計算用）
     $_SESSION['ampere']    = $val['ampere'];//SESSION変数に契約アンペアを保存（電気料金計算用）
+    $_SESSION['polling']    = $val['polling'];//SESSION変数に契約データ粒度を保存（電気使用量計算用）
     redirect('index.php');
   }else{
     //Login失敗時（失敗時はselect.phpの資料へのリンクがないバージョンを別途用意）

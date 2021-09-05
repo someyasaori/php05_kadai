@@ -1,5 +1,4 @@
 <?php
-
 //Sessionスタート
 session_start();
 
@@ -12,6 +11,7 @@ $user_name = $_SESSION['name'];
 $id = $_SESSION['id'];
 $plan = $_SESSION['plan'];
 $ampere = $_SESSION['ampere'];
+$polling = $_SESSION['polling'];
 
 //以降はログインユーザーのみ
 
@@ -25,28 +25,33 @@ $table_name = "id".$id;
 $this_month = date('Y-m-d 00:00:00', strtotime('first day of this month'));
 $today = date('Y-m-d H:i:s', strtotime('now'));
 
-//日別の合計値の取得
+//日別の合計値の取得（1分値と30分値で計算式を分ける）
 $daily_sum = array();
-$stmt = $pdo->prepare ("SELECT DATE_FORMAT(plot_date_time, '%Y-%m-%d') AS plot_date_time, SUM(wh/1000) AS daily_wh FROM $table_name WHERE wh>0 AND plot_date_time BETWEEN '$this_month' AND '$today' GROUP BY DATE_FORMAT(plot_date_time, '%Y-%m-%d') ");
+if($polling = "1min"){
+    $stmt = $pdo->prepare ("SELECT DATE_FORMAT(plot_date_time, '%Y-%m-%d') AS plot_date_time, SUM(wh/1000/60) AS daily_wh FROM $table_name WHERE wh>0 AND plot_date_time BETWEEN '$this_month' AND '$today' GROUP BY DATE_FORMAT(plot_date_time, '%Y-%m-%d') ");  
+} else {
+        $stmt = $pdo->prepare ("SELECT DATE_FORMAT(plot_date_time, '%Y-%m-%d') AS plot_date_time, SUM(wh/1000) AS daily_wh FROM $table_name WHERE wh>0 AND plot_date_time BETWEEN '$this_month' AND '$today' GROUP BY DATE_FORMAT(plot_date_time, '%Y-%m-%d') ");
+    }
+
 $status = $stmt->execute();
 if ($status == false) {
     sql_error($status);
 } else {
-    // while ($result = $stmt->fetch(PDO::FETCH_ASSOC)) {
-    //             $daily_sum .= h($result['daily_wh']);
-        //         // $view .= "<tr>";
-        //         // $view .= "<td>".h($result['name']).'</td><td>'.h($result['lid']).'</td><td>'.h($result['kanri_flg']).'</td><td>'.h($result['life_flg']).'</td><td>'.h($result['plan']).'</td><td>'.h($result['ampere']).'</td><td>'.'<a href="user_detail.php?id='.$result['id'].'">'.'[編集]'.'</a>'.'</td><td>'.'<a href="user_delete.php?id='.$result['id'].'">'.'[削除]'.'</a>';
-        //         // $view .= "</tr>";
-        //     }
-        // }   
     $daily_sum = $stmt->fetchAll();
-        }
-    
+    }
+
+
+//配列をJSON形式に変更    
 $json_array = json_encode($daily_sum);
 
-//今月の使用量合計
-$stmt2 =$pdo->prepare 
-("SELECT SUM(wh/1000) as monthly_wh FROM $table_name WHERE wh>0 AND plot_date_time BETWEEN '$this_month' AND '$today'");
+//今月の使用量合計（1分値と30分値で計算式を分ける）
+if($polling = "1min"){
+    $stmt2 =$pdo->prepare 
+    ("SELECT SUM(wh/1000/60) as monthly_wh FROM $table_name WHERE wh>0 AND plot_date_time BETWEEN '$this_month' AND '$today'");
+} else if{
+    $stmt2 =$pdo->prepare 
+    ("SELECT SUM(wh/1000) as monthly_wh FROM $table_name WHERE wh>0 AND plot_date_time BETWEEN '$this_month' AND '$today'");
+    }
 $status = $stmt2->execute();
 if($row2 = $stmt2 -> fetch()){
     $wh_this_month = $row2['monthly_wh'];
@@ -97,7 +102,7 @@ if ($wh_this_month < 120) {
  //今月の電気料金（時間帯別単価の場合）
 $stmt9 =$pdo->prepare 
 ("SELECT 
-   sum(tepco_night8.var_s1 * $table_name.wh/(2*1000)) AS bill
+   sum(tepco_night8.var_s1 * $table_name.wh/(1000*60)) AS bill
 FROM
 	$table_name
 LEFT JOIN 
@@ -117,7 +122,12 @@ if($row9 = $stmt9 -> fetch()){
 //先月の使用量合計
 $one_month_before = date('Y-m-d H:i:s', strtotime(date('Y-m-1') . '-1 month'));
 $end_month_one = date('Y-m-d 23:59:59', strtotime('last day of '. $one_month_before));
-$stmt3 =$pdo->prepare ("SELECT SUM(wh/1000) as wh FROM $table_name WHERE wh>0 AND plot_date_time BETWEEN '$one_month_before' AND '$end_month_one' ");
+
+if($polling = "1min"){
+    $stmt3 =$pdo->prepare ("SELECT SUM(wh/1000/60) as wh FROM $table_name WHERE wh>0 AND plot_date_time BETWEEN '$one_month_before' AND '$end_month_one' ");
+} else if{
+    $stmt3 =$pdo->prepare ("SELECT SUM(wh/1000) as wh FROM $table_name WHERE wh>0 AND plot_date_time BETWEEN '$one_month_before' AND '$end_month_one' ");
+}
 $status = $stmt3->execute();
 
 if($row3 = $stmt3 -> fetch()){
@@ -138,7 +148,7 @@ if ($wh_last_month < 120) {
 //先月の電気料金（時間帯別単価の場合）
 $stmt10 =$pdo->prepare 
 ("SELECT 
-   sum(tepco_night8.var_s1 * $table_name.wh/(2*1000)) AS bill
+   sum(tepco_night8.var_s1 * $table_name.wh/(1000*60)) AS bill
 FROM
 	$table_name
 LEFT JOIN 
@@ -155,6 +165,7 @@ $status = $stmt10->execute();
 if($row10 = $stmt10 -> fetch()){
     $bill_last_month = $row10['bill'];
     }
+    
 ?>
 
 
@@ -174,6 +185,7 @@ if($row10 = $stmt10 -> fetch()){
         <ul class="inner">
             <li><a href="index.php">トップに戻る</a></li>
             <li><a href="logout.php">ログアウト</a></li>
+            <li>こんにちは、<?= $user_name ?>さん</a></li>
         </ul>
     </nav>
     <p class="return"></p>
@@ -214,43 +226,39 @@ if($row10 = $stmt10 -> fetch()){
 
         <canvas id="chart" height="100" width="200"></canvas>
     
-    
-    
-    
-    
-    <!-- JQuery -->
+<!-- JQuery -->
     <script src="https://ajax.googleapis.com/ajax/libs/jquery/3.4.1/jquery.min.js"></script>
-    <!-- JQuery -->
+<!-- JQuery -->
     
-    <script>
+<script>
     
-    //年月表示の整理
-    let today = new Date();
-    let year = today.getFullYear();
-    let month =today.getMonth()+1;
-    let date = today.getDate();
-    let latest_day = '<p>'+year+'/'+month+'/'+date+'</p>'; 
-    $("#today").html(latest_day); 
+//年月表示の整理
+let today = new Date();
+let year = today.getFullYear();
+let month =today.getMonth()+1;
+ let date = today.getDate();
+let latest_day = '<p>'+year+'/'+month+'/'+date+'</p>'; 
+$("#today").html(latest_day); 
     
-    let this_month = year+'/'+ month;
-    let one_month_before = year+'/'+ (month - 1);
-    let two_month_before = year+'/'+ (month - 2);
-    let three_month_before = year+'/'+ (month - 3);
+let this_month = year+'/'+ month;
+let one_month_before = year+'/'+ (month - 1);
+let two_month_before = year+'/'+ (month - 2);
+let three_month_before = year+'/'+ (month - 3);
     
-    let js_array = <?php echo $json_array; ?>;
-    console.log(js_array);
+let js_array = <?php echo $json_array; ?>;
+console.log(js_array);
 
-    date_array = [];
-    kwh_array = [];
-    for(key in js_array){
-    date_array.push(js_array[key][0]);
-    kwh_array.push(js_array[key][1]);
-    }
-    console.log(date_array);
-    console.log(kwh_array);
+date_array = [];
+kwh_array = [];
+for(key in js_array){
+ date_array.push(js_array[key][0]);
+kwh_array.push(js_array[key][1]);
+}
+console.log(date_array);
+console.log(kwh_array);
  
 
-    //Chart.jsで棒グラフを描く
+//Chart.jsで棒グラフを描く
 jQuery (function ()
 {const config = {
         type: 'line',

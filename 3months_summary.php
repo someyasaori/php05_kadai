@@ -46,6 +46,14 @@ if($row2 = $stmt2 -> fetch()){
     $wh_this_month = $row2['wh'];
     }
 
+//１分値の場合
+$stmt20 =$pdo->prepare 
+("SELECT sum(wh/1000/60) as wh FROM $table_name WHERE wh>0 AND plot_date_time BETWEEN '$this_month' AND '$today'");
+$status = $stmt20->execute();
+if($row20 = $stmt20 -> fetch()){
+    $wh_this_month_r = $row20['wh'];
+    }
+
 //基本料金取得
 $stmt11 = $pdo->prepare 
 ("SELECT fixed FROM $plan WHERE plot_date_time = '00:00:00'");
@@ -211,6 +219,7 @@ if($row10 = $stmt10 -> fetch()){
         <ul class="inner">
             <li><a href="index.php">トップに戻る</a></li>
             <li><a href="logout.php">ログアウト</a></li>
+            <li>こんにちは、<?= $user_name ?>さん</a></li>
         </ul>
     </nav>
     <p class="return"></p>
