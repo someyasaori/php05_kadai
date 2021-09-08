@@ -130,7 +130,24 @@ if($row5 = $stmt5 -> fetch()){
     $wh_three_month_before = round($row5['wh']);
     }
 
-//時間帯別料金との分岐点（従量料金のバーが違うメニュー未反映！！）
+//排出係数(CO2 キロ/kWh) 杉の木1本で年間14kgのCO2を吸収
+$stmt20 =$pdo->prepare ("SELECT rate FROM emission WHERE plan = '$plan' ");
+$status = $stmt20->execute();
+if($row20 = $stmt20 -> fetch()){
+    $emission_rate = $row20['rate']*1000;
+    }
+//先月の排出量
+$emission_last_month = $wh_last_month * $emission_rate;
+
+//先々月の排出量
+$emission_two_month_before = $wh_two_month_before * $emission_rate;
+$emission_comparison = round(abs($emission_last_month - $emission_two_month_before));
+
+if ($emission_last_month < $emission_two_month_before){
+    $message = "トン減りました";
+}
+
+//時間帯別料金との分岐点
 
 if ($plan == "tepco_night8"){
 
@@ -295,12 +312,8 @@ if ($plan == "tepco_night8"){
 }
 
 //user_tableに先月の電気料金を記録
-$stmt16 = $pdo->prepare("INSERT INTO user_table(last_month_result) VALUES($last_month_bill) WHERE id = $id");
-$status = $stmt16->execute();
-if($status==false){
-    $error = $stmt16->errorInfo();
-    }else{header('Location: user_index.php');
-}
+    $stmt16 = $pdo->prepare ("UPDATE ranking SET last_month_bill = $last_month_bill) WHERE id = $id");
+    $status = $stmt16->execute();
 
 //過去3か月の使い方からおすすめの電力メニュー
 //各社の料金体系で電気料金試算
@@ -738,14 +751,79 @@ if($status==false){
 <body>
 <h2>最近のでんきの使い方は？</h2>
 
-<canvas id="chart" height="100" width="200"></canvas>
 
-<p><span id="today"></span>までの電気料金： <?= $this_month_bill ?>円</p>
-<p>先月の電気料金： <?= $last_month_bill ?>円</p>
-<p>2か月前の電気料金： <?= $bill_two_month_before ?>円</p>
-<p>3か月前の電気料金： <?=  $bill_three_month_before ?>円</p>
+    <div class="bill-wrapper">
 
-<p>あなたにおすすめの電気料金メニューは・・・ <?=  $cheapest_result ?></p>
+    <table>
+            <tr>
+                <th>3か月前の電気料金</th>   
+            </tr>
+            <tr>
+                <td><?=  $bill_three_month_before ?> 円</td>
+            </tr>
+    </table>
+    <div class ="arrow"><img src="img/arrow.png" alt="arrow"></div>
+    <table>
+            <tr>
+                <th>2か月前の電気料金</th>   
+            </tr>
+            <tr>
+                <td> <?= $bill_two_month_before ?> 円</td>
+            </tr>
+    </table>
+    <div class ="arrow"><img src="img/arrow.png" alt="arrow"></div>
+    <table>
+            <tr>
+                <th>先月の電気料金</th>   
+            </tr>
+            <tr>
+                <td><?= $last_month_bill ?> 円</td>
+            </tr>
+    </table>
+
+
+    </div>
+
+    <div id="emission"></div>
+
+    <div class="flex">
+    <!-- <img src="img/leaves.png" alt="tree"> -->
+    <canvas id="chart" height="100" width="200"></canvas>
+    <!-- <img src="img/tree_small.png" alt="tree"> -->
+   
+
+    <!-- <p>今日までの電気料金： <?= $this_month_bill ?>円</p> -->
+    <!-- <p>先月の電気料金： <?= $last_month_bill ?>円</p>
+    <p>2か月前の電気料金： <?= $bill_two_month_before ?>円</p>
+    <p>3か月前の電気料金： <?=  $bill_three_month_before ?>円</p> -->
+
+    
+    <p class ="recommend">最近の使い方から、<br> おすすめの電気料金メニューは・・・ 
+    <span class="outstand"><?=  $cheapest_result ?>！！</span>
+    
+    <form method="POST" action="comparison.php">
+        <p><input type="hidden" name ="tepco_standard1" value= "<?= $last_month_bill_tepco_standard ?>"></p>
+        <p><input type="hidden" name ="tepco_standard2" value= "<?= $bill_two_month_before_tepco_standard ?>"></p>
+        <p><input type="hidden" name ="tepco_standard3" value= "<?= $bill_three_month_before_tepco_standard ?>"></p>
+        <p><input type="hidden" name ="tokyogas1" value= "<?= $last_month_bill_tokyogas ?>"></p>
+        <p><input type="hidden" name ="tokyogas2" value= "<?= $bill_two_month_before_tokyogas ?>"></p>
+        <p><input type="hidden" name ="tokyogas3" value= "<?= $bill_three_month_before_tokyogas ?>"></p>
+        <p><input type="hidden" name ="rakuten1" value= "<?= $last_month_bill_rakuten ?>"></p>
+        <p><input type="hidden" name ="rakuten2" value= "<?= $bill_two_month_before_rakuten ?>"></p>
+        <p><input type="hidden" name ="rakuten3" value= "<?= $bill_three_month_before_rakuten ?>"></p>
+        <p><input type="hidden" name ="kddi1" value= "<?= $last_month_bill_kddi ?>"></p>
+        <p><input type="hidden" name ="kddi2" value= "<?= $bill_two_month_before_kddi ?>"></p>
+        <p><input type="hidden" name ="kddi3" value= "<?= $bill_three_month_before_kddi ?>"></p>
+        <p><input type="hidden" name ="softbank1" value= "<?= $last_month_bill_softbank ?>"></p>
+        <p><input type="hidden" name ="softbank2" value= "<?= $bill_two_month_before_softbank ?>"></p>
+        <p><input type="hidden" name ="softbank3" value= "<?= $bill_three_month_before_softbank ?>"></p>
+        <p><input type="hidden" name ="looop1" value= "<?= $last_month_bill_looop ?>"></p>
+        <p><input type="hidden" name ="looop2" value= "<?= $bill_two_month_before_looop ?>"></p>
+        <p><input type="hidden" name ="looop3" value= "<?= $bill_three_month_before_looop ?>"></p>
+        <p class="centering"><input type="submit" id="submit" value="比較内容詳細"></p>
+        </p>
+    </form>
+    </div>
 
 <p class="return"><a href="index.php">トップに戻る</a></p>
 
@@ -770,6 +848,18 @@ let one_month_before = year+'/'+ (month - 1);
 let two_month_before = year+'/'+ (month - 2);
 let three_month_before = year+'/'+ (month - 3);
 
+//CO2排出量メッセージ
+let emission_comparison = <?= $emission_comparison ?>;
+let emission_last_month = <?= $emission_last_month ?>;
+let emission_two_month_before = <?= $emission_two_month_before ?>;
+let tree = emission_comparison/14;
+
+if (emission_last_month < emission_two_month_before){
+   $("#emission").html ("先月はCO2排出量が"+emission_comparison +"トン減りました！なんと杉の木"+tree+"本が１年間に吸収する量と同じ！");
+} else {
+    $("#emission").html ("先月はCO2排出量が"+emission_comparison +"トン増えてしまいました・・・");
+}
+
 //Chart.jsで棒グラフを描く
 jQuery (function ()
 {const config = {
@@ -788,7 +878,7 @@ const barChartData = {
         {
         label: "電気使用量(kWh)",
         backgroundColor: "rgba(60,179,113,0.5)",
-        data : [<?= $wh_three_month_before ?>,<?= $wh_two_month_before ?>,<?= $wh_last_month ?>,<?= $wh_this_month ?>]
+        data : [<?= $wh_three_month_before ?>,<?= $wh_two_month_before ?>,<?= $wh_last_month_r ?>,<?= $wh_this_month_r ?>]
         },   
     ]
 }

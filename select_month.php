@@ -170,23 +170,27 @@ if($row9 = $stmt9 -> fetch()){
 
 <body>
 <h2><?= $year?>年<?= $month?>月のでんきの使い方は？</h2>
-
-    <table border =1>
+<div class="tables">
+    <table>
         <tr>
             <th><?= $year?>年<?= $month?>月の電気料金
-                <th> <?= $selected_month_bill ?> 円</th>
+        </tr>
+        <tr>
+            <td> <?= $selected_month_bill ?> 円</th>
             </th>   
         </tr>
     </table>
 
-    <table border =1>
+    <table>
         <tr>
             <th><?= $year?>年<?= $month?>月の電気使用量
-                <th> <?= $wh_selected_month_r ?> kWh</th>
+            </tr>
+            <tr>
+                <td> <?= $wh_selected_month_r ?> kWh</td>
             </th>   
         </tr>
     </table>
-
+</div>
         <canvas id="chart" height="100" width="200"></canvas>
     
 <!-- JQuery -->

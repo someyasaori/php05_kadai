@@ -22,6 +22,10 @@ $pdo = db_conn();
 //IDと一致するテーブル名を作成する
 $table_name = "id".$id;
 
+//idをrankingテーブルに入力する
+$stmt15 = $pdo->prepare("INSERT INTO ranking(id) VALUES($id)");
+$status = $stmt15->execute();
+
 //今月の今日時点までの定義
 $this_month = date('Y-m-d 00:00:00', strtotime('first day of this month'));
 $today = date('Y-m-d H:i:s', strtotime('now'));
@@ -111,6 +115,7 @@ if($row3 = $stmt3 -> fetch()){
     }
 //小数点以下四捨五入
 $wh_last_month_r = round($wh_last_month);
+
 
 //時間帯別料金との分岐点
 if ($plan == "tepco_night8"){
@@ -217,12 +222,12 @@ if($row10 = $stmt10 -> fetch()){
             <li>こんにちは、<?= $user_name ?>さん</a></li>
         </ul>
     </nav>
-    <p class="return"></p>
 </header>
 
     <body>
     <h2>今月のでんきの使い方は？</h2>
-    <table border =1>
+    <div class="tables">
+    <table>
         <tr>
             <th>今日までの電気料金
                 <th> <?= $this_month_bill ?> 円</th>
@@ -235,7 +240,7 @@ if($row10 = $stmt10 -> fetch()){
         </tr>
     </table>
 
-    <table border =1>
+    <table>
         <tr>
             <th>今日までの電気使用量
                 <th> <?= $wh_this_month_r ?> kWh</th>
@@ -247,11 +252,7 @@ if($row10 = $stmt10 -> fetch()){
             </td>
         </tr>
     </table>
-        <!-- <p><span id="today"></span>までの電気料金： <?= $this_month_bill ?> 円</p>
-        <p>先月の電気料金： <?= $last_month_bill ?> 円</p>
-
-        <p>今日までの電気使用量： <?= $wh_this_month_r ?> kWh</p>
-        <p>先月の電気使用量： <?= $wh_last_month_r ?> kWh</p> -->
+    </div>
 
         <canvas id="chart" height="100" width="200"></canvas>
     

@@ -23,9 +23,9 @@
 <h1>かしこく電気を使おう 目次</h1>
 
 <!-- <div class="sub"> 以下AJAX無しVer -->
-<h2>今月の概況</h2>
+<h2>今月のでんきの使い方を見る</h2>
 <!-- 今月の累積使用量、今月の累積電気料金を表示するページに飛ぶ -->
-<p id="summary_this month"><a href="1month_summary.php">表示</a></p>
+<p id="recent"><a href="1month_summary.php">表示</a></p>
 
 <h2>月別データを検索</h2>
 <form method ="POST" action="select_month.php">
@@ -46,14 +46,14 @@
 </form> -->
 
 
-<h2>直近3か月の電気使用料を比較</h2>
+<h2>直近3か月のでんきの使い方を見る</h2>
 <p id="recent"><a href="3months_summary.php">表示</a></p>
 
 <p class ="admin"><a href="user_index.php">ユーザー管理画面（管理者のみ）</a></p>
+<div class ="tree">
+<img src="img/tree.png" alt="tree"><img src="img/tree.png" alt="tree"><img src="img/tree.png" alt="tree">
+</div>
 
-<!-- <div id="view"></div> -->
-<!-- </div> -->
-<!-- </main> -->
 <!-- JQuery -->
 <script src="https://ajax.googleapis.com/ajax/libs/jquery/3.4.1/jquery.min.js"></script>
 <!-- JQuery -->

@@ -44,6 +44,8 @@ $stmt->bindValue(':plan', $plan, PDO::PARAM_STR);
 $stmt->bindValue(':ampere', $ampere, PDO::PARAM_INT);
 $stmt->bindValue(':polling', $polling, PDO::PARAM_STR);
 
+
+
 //登録実行
 $status = $stmt->execute();
 
@@ -56,5 +58,7 @@ if($status==false){
 // } else {
 //     exit ("管理者としてログインしてください");
 // }
+
+
 
 ?>
