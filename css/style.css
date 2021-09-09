@@ -3,6 +3,7 @@
 .header-wrapper ul{
     overflow: hidden;
     padding-right: 30px;
+    /* background-color: #ffffe0; */
 }
 .header-wrapper li{
     float: right;
@@ -16,23 +17,23 @@
 }
 
 li:hover{
-    background-color:#ffffe0;
+    background-color:#f0e68c;
+
 }
 
 main{
-    max-width:1000px;
-    height: auto;
-    margin:auto;
-    display:flex;
-    justify-content:space-evenly;
-}
+    width:100%;
+   background-image:url(../img/leaves3_small.png);
+   /* background-size:cover; */
+   background-repeat: no-repeat;
+} 
 
 h1{
     font-size: 25px;
     color:#006400;
     font-weight:bold;
     max-width:50%;
-    background: linear-gradient(transparent 60%, #98fb98 40%);
+    background: linear-gradient(transparent 60%, #9acd32 40%);
     text-align: center;
     margin:auto;
     margin-top:30px;
@@ -122,8 +123,11 @@ h2{
 .tree{
     display: flex;
     justify-content: center;
+    margin: auto;
+    max-width:100%;
+    text-align: center;
 }
-/*検索インプット index.php*/
+
 
 /* 1month summary.php */
 
@@ -148,44 +152,50 @@ h2{
 th{
     /* width:10%; */
     font-size:16px;
-    color:#696969;
-    background-color:#66cdaa;
-    border:1px solid #006400;
-    border-bottom: 1px solid #0000cd;
-    border-right: 1px solid #0000cd; 
+    color:#fff;
+    background-color:#3cb371;
+    border:1px solid #a9a9a9;
+    border-bottom: 1px solid #a9a9a9;
+    border-right: 1px solid #a9a9a9; 
     text-align: center; 
+    /* width: 100%; */
 }
 
 td{
     font-size:14px;
     color:#000000;
     background-color:#fffafa;
-    border:1px solid #006400; 
-    border-bottom: 1px solid #0000cd;
-    border-right: 1px solid #0000cd;
+    border:1px solid #a9a9a9; 
+    border-bottom: 1px solid #a9a9a9;
+    border-right: 1px solid #a9a9a9;
     text-align: center;
+    /* width: 100%; */
 }
 
 .tables{
     display: flex;
     justify-content: center;
-    width:90%;
+    width:100%;
     margin: auto;
 }
 
 .return{
-    max-width:900px;
+    display: flex;
+    justify-content:center;
+    /* max-width:100%; */
     font-size: 15px;
     text-align: center;
     margin-top: 50px;
 }
+
 
 /* 3month summary.php */
 .bill-wrapper{
     display: flex;
     justify-content:center;
     width:90%;
-    padding: 20px;
+    margin:20px 0px 20px 0px;
+    /* padding: 20px; */
 }
 
 .arrow{
@@ -199,11 +209,12 @@ td{
 .flex{
     display: flex;
     justify-content: center;
+    align-items: center;
 }
 
 .centering{
     height: 25px;
-    width:200px;
+    width:100px;
     margin: auto;
     text-align: center;
     border: none;
@@ -219,4 +230,15 @@ td{
     font-size: 20px;
     font-weight:bold;
 
+}
+
+.comparison{
+    width: 900px;
+    margin:auto;
+}
+
+.login{
+    background-image: url(../img/tree.png);
+       background-size:cover;
+   background-repeat: no-repeat;
 }

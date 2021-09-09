@@ -5,7 +5,7 @@
     <meta http-equiv="X-UA-Compatible" content="IE=edge">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
     <link rel="stylesheet" href="css/style.css">
-    <title>お役立ちリンク集</title>
+    <title>でんきアプリ</title>
 </head>
 <body>
 
@@ -20,7 +20,7 @@
     </nav>
 </header>
 
-<h1>かしこく電気を使おう 目次</h1>
+<h1>あなたのでんきの使い方は？</h1>
 
 <!-- <div class="sub"> 以下AJAX無しVer -->
 <h2>今月のでんきの使い方を見る</h2>
@@ -35,15 +35,6 @@
     </p>
     <p id="submit-btn"><input type="submit" name="submit" id="submit" value="表示"></p>
 </form>
-
-<!-- <div class="sub"> 以下AJAXありVer -->
-<!-- <form>
-    <p class="date-wrapper">確認したい月を選ぶ 
-        <select id="year" name="year"></select>
-        <select id="month" name="month"></select>
-    </p>
-    <button id="btn">表示</button>
-</form> -->
 
 
 <h2>直近3か月のでんきの使い方を見る</h2>

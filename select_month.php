@@ -156,7 +156,7 @@ if($row9 = $stmt9 -> fetch()){
     <script src="https://cdnjs.cloudflare.com/ajax/libs/Chart.js/2.7.1/Chart.min.js"></script>
     <title>でんき料金サマリー</title>
 </head>
-
+<main>
 <header>
     <nav class="header-wrapper">
         <ul class="inner">
@@ -192,7 +192,9 @@ if($row9 = $stmt9 -> fetch()){
     </table>
 </div>
         <canvas id="chart" height="100" width="200"></canvas>
-    
+
+</main>   
+
 <!-- JQuery -->
     <script src="https://ajax.googleapis.com/ajax/libs/jquery/3.4.1/jquery.min.js"></script>
 <!-- JQuery -->

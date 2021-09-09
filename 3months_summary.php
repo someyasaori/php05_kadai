@@ -737,96 +737,87 @@ if ($plan == "tepco_night8"){
     <title>でんき料金サマリー</title>
 </head>
 
-<header>
-    <nav class="header-wrapper">
-        <ul class="inner">
-            <li><a href="index.php">トップに戻る</a></li>
-            <li><a href="logout.php">ログアウト</a></li>
-            <li>こんにちは、<?= $user_name ?>さん</a></li>
-        </ul>
-    </nav>
-    <p class="return"></p>
-</header>
+<main>
+    <header>
+        <nav class="header-wrapper">
+            <ul class="inner">
+                <li><a href="index.php">トップに戻る</a></li>
+                <li><a href="logout.php">ログアウト</a></li>
+                <li>こんにちは、<?= $user_name ?>さん</a></li>
+            </ul>
+        </nav>
+        <p class="return"></p>
+    </header>
 
 <body>
 <h2>最近のでんきの使い方は？</h2>
 
 
     <div class="bill-wrapper">
-
-    <table>
-            <tr>
-                <th>3か月前の電気料金</th>   
-            </tr>
-            <tr>
-                <td><?=  $bill_three_month_before ?> 円</td>
-            </tr>
-    </table>
-    <div class ="arrow"><img src="img/arrow.png" alt="arrow"></div>
-    <table>
-            <tr>
-                <th>2か月前の電気料金</th>   
-            </tr>
-            <tr>
-                <td> <?= $bill_two_month_before ?> 円</td>
-            </tr>
-    </table>
-    <div class ="arrow"><img src="img/arrow.png" alt="arrow"></div>
-    <table>
-            <tr>
-                <th>先月の電気料金</th>   
-            </tr>
-            <tr>
-                <td><?= $last_month_bill ?> 円</td>
-            </tr>
-    </table>
-
-
+            <table>
+                    <tr>
+                        <th>3か月前の電気料金</th>   
+                    </tr>
+                    <tr>
+                        <td><?=  $bill_three_month_before ?> 円</td>
+                    </tr>
+            </table>
+        <div class ="arrow"><img src="img/arrow.png" alt="arrow"></div>
+            <table>
+                <tr>
+                    <th>2か月前の電気料金</th>   
+                </tr>
+                <tr>
+                    <td> <?= $bill_two_month_before ?> 円</td>
+                </tr>
+            </table>
+        <div class ="arrow"><img src="img/arrow.png" alt="arrow"></div>
+            <table>
+                    <tr>
+                        <th>先月の電気料金</th>   
+                    </tr>
+                    <tr>
+                        <td><?= $last_month_bill ?> 円</td>
+                    </tr>
+            </table>
     </div>
 
     <div id="emission"></div>
 
     <div class="flex">
-    <!-- <img src="img/leaves.png" alt="tree"> -->
-    <canvas id="chart" height="100" width="200"></canvas>
-    <!-- <img src="img/tree_small.png" alt="tree"> -->
-   
-
-    <!-- <p>今日までの電気料金： <?= $this_month_bill ?>円</p> -->
-    <!-- <p>先月の電気料金： <?= $last_month_bill ?>円</p>
-    <p>2か月前の電気料金： <?= $bill_two_month_before ?>円</p>
-    <p>3か月前の電気料金： <?=  $bill_three_month_before ?>円</p> -->
-
-    
-    <p class ="recommend">最近の使い方から、<br> おすすめの電気料金メニューは・・・ 
-    <span class="outstand"><?=  $cheapest_result ?>！！</span>
-    
-    <form method="POST" action="comparison.php">
-        <p><input type="hidden" name ="tepco_standard1" value= "<?= $last_month_bill_tepco_standard ?>"></p>
-        <p><input type="hidden" name ="tepco_standard2" value= "<?= $bill_two_month_before_tepco_standard ?>"></p>
-        <p><input type="hidden" name ="tepco_standard3" value= "<?= $bill_three_month_before_tepco_standard ?>"></p>
-        <p><input type="hidden" name ="tokyogas1" value= "<?= $last_month_bill_tokyogas ?>"></p>
-        <p><input type="hidden" name ="tokyogas2" value= "<?= $bill_two_month_before_tokyogas ?>"></p>
-        <p><input type="hidden" name ="tokyogas3" value= "<?= $bill_three_month_before_tokyogas ?>"></p>
-        <p><input type="hidden" name ="rakuten1" value= "<?= $last_month_bill_rakuten ?>"></p>
-        <p><input type="hidden" name ="rakuten2" value= "<?= $bill_two_month_before_rakuten ?>"></p>
-        <p><input type="hidden" name ="rakuten3" value= "<?= $bill_three_month_before_rakuten ?>"></p>
-        <p><input type="hidden" name ="kddi1" value= "<?= $last_month_bill_kddi ?>"></p>
-        <p><input type="hidden" name ="kddi2" value= "<?= $bill_two_month_before_kddi ?>"></p>
-        <p><input type="hidden" name ="kddi3" value= "<?= $bill_three_month_before_kddi ?>"></p>
-        <p><input type="hidden" name ="softbank1" value= "<?= $last_month_bill_softbank ?>"></p>
-        <p><input type="hidden" name ="softbank2" value= "<?= $bill_two_month_before_softbank ?>"></p>
-        <p><input type="hidden" name ="softbank3" value= "<?= $bill_three_month_before_softbank ?>"></p>
-        <p><input type="hidden" name ="looop1" value= "<?= $last_month_bill_looop ?>"></p>
-        <p><input type="hidden" name ="looop2" value= "<?= $bill_two_month_before_looop ?>"></p>
-        <p><input type="hidden" name ="looop3" value= "<?= $bill_three_month_before_looop ?>"></p>
-        <p class="centering"><input type="submit" id="submit" value="比較内容詳細"></p>
-        </p>
-    </form>
+        <!-- <img src="img/leaves.png" alt="tree"> -->
+        <canvas id="chart" height="100" width="200"></canvas>
+        <!-- <img src="img/tree_small.png" alt="tree"> -->
+       
+        <div class ="recommend">最近の使い方から、<br> おすすめの電気料金メニューは・・・ 
+            <span class="outstand"><?=  $cheapest_result ?>！！</span> 
+       
+            <form method="POST" action="comparison.php">
+                <p><input type="hidden" name ="tepco_standard1" value= "<?= $last_month_bill_tepco_standard ?>"></p>
+                <p><input type="hidden" name ="tepco_standard2" value= "<?= $bill_two_month_before_tepco_standard ?>"></p>
+                <p><input type="hidden" name ="tepco_standard3" value= "<?= $bill_three_month_before_tepco_standard ?>"></p>
+                <p><input type="hidden" name ="tokyogas1" value= "<?= $last_month_bill_tokyogas ?>"></p>
+                <p><input type="hidden" name ="tokyogas2" value= "<?= $bill_two_month_before_tokyogas ?>"></p>
+                <p><input type="hidden" name ="tokyogas3" value= "<?= $bill_three_month_before_tokyogas ?>"></p>
+                <p><input type="hidden" name ="rakuten1" value= "<?= $last_month_bill_rakuten ?>"></p>
+                <p><input type="hidden" name ="rakuten2" value= "<?= $bill_two_month_before_rakuten ?>"></p>
+                <p><input type="hidden" name ="rakuten3" value= "<?= $bill_three_month_before_rakuten ?>"></p>
+                <p><input type="hidden" name ="kddi1" value= "<?= $last_month_bill_kddi ?>"></p>
+                <p><input type="hidden" name ="kddi2" value= "<?= $bill_two_month_before_kddi ?>"></p>
+                <p><input type="hidden" name ="kddi3" value= "<?= $bill_three_month_before_kddi ?>"></p>
+                <p><input type="hidden" name ="softbank1" value= "<?= $last_month_bill_softbank ?>"></p>
+                <p><input type="hidden" name ="softbank2" value= "<?= $bill_two_month_before_softbank ?>"></p>
+                <p><input type="hidden" name ="softbank3" value= "<?= $bill_three_month_before_softbank ?>"></p>
+                <p><input type="hidden" name ="looop1" value= "<?= $last_month_bill_looop ?>"></p>
+                <p><input type="hidden" name ="looop2" value= "<?= $bill_two_month_before_looop ?>"></p>
+                <p><input type="hidden" name ="looop3" value= "<?= $bill_three_month_before_looop ?>"></p>
+                <p class="centering"><input type="submit" id="submit" value="詳細"></p>
+            </form>
+        </div>
     </div>
 
 <p class="return"><a href="index.php">トップに戻る</a></p>
-
+</main>
 
 
 <!-- JQuery -->

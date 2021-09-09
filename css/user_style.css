@@ -151,3 +151,12 @@ td{
     margin-top: 50px;
 
 }
+
+.tree{
+    margin-top: 120px;
+    display: flex;
+    justify-content: center;
+    /* margin: auto; */
+    max-width:100%;
+    /* text-align: center; */
+}

@@ -43,7 +43,7 @@ $looop3 = $_POST["looop3"];
     <script src="https://cdnjs.cloudflare.com/ajax/libs/Chart.js/2.7.1/Chart.min.js"></script>
     <title>電気料金メニュー比較</title>
 </head>
-
+<main>
 <header>
     <nav class="header-wrapper">
         <ul class="inner">
@@ -56,8 +56,8 @@ $looop3 = $_POST["looop3"];
 </header>
 
 <body>
-
-<table border =1>
+<h2>最近のでんきの使い方でいちばん安いメニューは？</h2>
+<table class="comparison">
         <tr>
             <th>月
                 <th id="month1"> </th>
@@ -122,7 +122,7 @@ $looop3 = $_POST["looop3"];
             </td>
         </tr> -->
     </table>
-
+</main>
 <!-- JQuery -->
 <script src="https://ajax.googleapis.com/ajax/libs/jquery/3.4.1/jquery.min.js"></script>
 <!-- JQuery -->
