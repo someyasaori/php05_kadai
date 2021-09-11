@@ -86,6 +86,102 @@ if ($status == false) {
 //配列をJSON形式に変更    
 $json_array = json_encode($daily_sum);
 
+
+//今月の累積wh計算。まず前月までの合計値を計算
+if($polling == "1min"){
+    $stmt16 =$pdo->prepare 
+    ("SELECT SUM(wh/1000/60) as precum_sum FROM $table_name WHERE wh>0 AND plot_date_time <= '$this_month'");
+    } else {
+        $stmt16 =$pdo->prepare 
+    ("SELECT SUM(wh/1000) as precum_sum FROM $table_name WHERE wh>0 AND plot_date_time <= '$this_month'");
+    }
+ 
+$status = $stmt16->execute();
+if($row16 = $stmt16 -> fetch()){
+    $precum_sum = $row16['precum_sum'];
+    }
+
+//今月の累積wh計算。前月までの合計値を引く。
+$cum_sum = array();
+
+if($polling == "1min"){
+$stmt17 =$pdo->prepare 
+("SELECT temp1.plot_date_time, temp1.wh, (SUM(temp2.wh/1000/60) - $precum_sum) AS cum_sum 
+ FROM $table_name temp1 
+ INNER JOIN $table_name temp2 
+ ON temp1.plot_date_time >= temp2.plot_date_time 
+ AND temp1.wh>0 AND temp1.plot_date_time BETWEEN '$this_month' AND '$today' 
+ GROUP BY temp1.plot_date_time, temp1.wh
+ ORDER BY temp1.plot_date_time "); 
+} else {
+    $stmt17 =$pdo->prepare 
+    ("SELECT temp1.plot_date_time, temp1.wh, (SUM(temp2.wh/1000) - $precum_sum) AS cum_sum 
+    FROM $table_name temp1 
+    INNER JOIN $table_name temp2 
+    ON temp1.plot_date_time >= temp2.plot_date_time 
+    AND temp1.wh>0 AND temp1.plot_date_time BETWEEN '$this_month' AND '$today' 
+    GROUP BY temp1.plot_date_time, temp1.wh
+    ORDER BY temp1.plot_date_time "); 
+}
+
+$status = $stmt17->execute();
+if ($status == false) {
+    sql_error($status);
+} else {
+    $cum_sum = $stmt17->fetchAll();
+    }
+
+//配列をJSON形式に変更    
+$json_array2 = json_encode($cum_sum);
+
+//先月の累積wh計算。まず先々月までの合計値を計算
+if($polling == "1min"){
+    $stmt18 =$pdo->prepare 
+    ("SELECT SUM(wh/1000/60) as precum_sum_last FROM $table_name WHERE wh>0 AND plot_date_time <= '$one_month_before'");
+    } else {
+        $stmt18 =$pdo->prepare 
+    ("SELECT SUM(wh/1000) as precum_sum_last FROM $table_name WHERE wh>0 AND plot_date_time <= '$one_month_before'");
+    }
+ 
+$status = $stmt18->execute();
+if($row18 = $stmt18 -> fetch()){
+    $precum_sum_last = $row18['precum_sum_last'];
+    }
+
+//先月の累積wh計算。先々月までの合計値を差し引く
+$cum_sum_last = array();
+
+if($polling == "1min"){
+$stmt19 =$pdo->prepare 
+("SELECT temp1.plot_date_time, temp1.wh, (SUM(temp2.wh/1000/60) - $precum_sum_last) AS cum_sum_last 
+ FROM $table_name temp1 
+ INNER JOIN $table_name temp2 
+ ON temp1.plot_date_time >= temp2.plot_date_time 
+ AND temp1.wh>0 AND temp1.plot_date_time BETWEEN '$one_month_before' AND '$end_month_one' 
+ GROUP BY temp1.plot_date_time, temp1.wh
+ ORDER BY temp1.plot_date_time "); 
+} else {
+    $stmt19 =$pdo->prepare 
+    ("SELECT temp1.plot_date_time, temp1.wh, (SUM(temp2.wh/1000) - $precum_sum_last) AS cum_sum_last 
+    FROM $table_name temp1 
+    INNER JOIN $table_name temp2 
+    ON temp1.plot_date_time >= temp2.plot_date_time 
+    AND temp1.wh>0 AND temp1.plot_date_time BETWEEN '$one_month_before' AND '$end_month_one'
+    GROUP BY temp1.plot_date_time, temp1.wh
+    ORDER BY temp1.plot_date_time "); 
+}
+
+$status = $stmt19->execute();
+if ($status == false) {
+    sql_error($status);
+} else {
+    $cum_sum_last = $stmt19->fetchAll();
+    }
+
+//配列をJSON形式に変更    
+$json_array3 = json_encode($cum_sum_last);
+
+
 //今月の使用量合計（1分値と30分値で計算式を分ける）
 if($polling == "1min"){
 $stmt2 =$pdo->prepare 
@@ -255,10 +351,12 @@ if($row10 = $stmt10 -> fetch()){
     </div>
 
         <canvas id="chart" height="100" width="200"></canvas>
+
 </main>
 
 <!-- JQuery -->
     <script src="https://ajax.googleapis.com/ajax/libs/jquery/3.4.1/jquery.min.js"></script>
+    <script src="https://cdnjs.cloudflare.com/ajax/libs/moment.js/2.10.6/moment.js"></script>
 <!-- JQuery -->
     
 <script>
@@ -276,20 +374,34 @@ let one_month_before = year+'/'+ (month - 1);
 let two_month_before = year+'/'+ (month - 2);
 let three_month_before = year+'/'+ (month - 3);
     
-let js_array = <?php echo $json_array; ?>;
+let js_array = <?php echo $json_array2; ?>;//今月分
+let js_array_last = <?php echo $json_array3; ?>;//先月分
 console.log(js_array);
 
 date_array = [];
 kwh_array = [];
+date_array_last = [];
+kwh_array_last = [];
+
 for(key in js_array){
  date_array.push(js_array[key][0]);
-kwh_array.push(js_array[key][1]);
+kwh_array.push(js_array[key][2]);
 }
-console.log(date_array);
-console.log(kwh_array);
+
+for(key in js_array_last){
+ date_array_last.push(js_array_last[key][0]);
+kwh_array_last.push(js_array_last[key][2]);
+}
+
+// var cum_date = new Date(date_array_last);
+// var cum_date_r = cum_date.getDate();
+// // date_array_last = getDay(date_array_last);
+
+// console.log(cum_date_r);
+// console.log(kwh_array);
  
 
-//Chart.jsで棒グラフを描く
+//Chart.jsで折れ線グラフを描く
 jQuery (function ()
 {const config = {
         type: 'line',
@@ -302,15 +414,28 @@ jQuery (function ()
 })
 
 const barChartData = {
-    labels : date_array,
+    labels : date_array_last,
     datasets : [
         {
-        label: "日別電気使用量(kWh)",
-        backgroundColor: "rgba(60,179,113,0.5)",
+        label: "先月の累積使用量(kWh)",
+        borderColor: "#4169e1",
+        // backgroundColor: "rgba(60,179,113,0.5)",
+        borderWidth:2,
+        pointRadius:0,
+        data : kwh_array_last
+        },  
+        {
+        label: "今月の累積使用量(kWh)",
+        borderColor: "#3cb371",
+        // backgroundColor: "rgba(60,179,113,0.5)",
+        borderWidth:2,
+        pointRadius:0,
         data : kwh_array
-        },   
+        } 
     ]
+    
 }
+
 
 </script>
 
