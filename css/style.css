@@ -1,4 +1,4 @@
-/* 登録インプット index.php*/
+/* トップ index.php*/
 
 .header-wrapper ul{
     overflow: hidden;
@@ -21,30 +21,46 @@ li:hover{
 
 }
 
-main{
-    width:100%;
-   background-image:url(../img/leaves3_small.png);
-   /* background-size:cover; */
-   background-repeat: no-repeat;
-} 
+
 
 h1{
     font-size: 25px;
     color:#006400;
     font-weight:bold;
     max-width:50%;
-    background: linear-gradient(transparent 60%, #9acd32 40%);
+    /* background: linear-gradient(transparent 60%, #9acd32 40%); */
     text-align: center;
     margin:auto;
     margin-top:30px;
 }
 
 h2{
+    width: 300px;
     font-size: 20px;
     color:#006400;
     font-weight:bold;
+    margin:auto;
     text-align: center;
     margin-top:50px;
+    background: linear-gradient(transparent 60%, #eee8aa 40%);
+}
+
+h3{
+    font-size: 15px;
+    color:#006400;
+    /* font-weight:bold; */
+    text-align: center;
+    /* margin-top:50px; */
+}
+
+.display-outer{
+    display: flex;
+    justify-content: center;
+}
+
+.in-outer{
+    justify-content: center;
+    padding: 20px;
 }
 
 .date-wrapper{
@@ -52,17 +68,33 @@ h2{
    justify-content: center;
 }
 
-.sub{
-    max-width:50%;
-    /* display:flex;
-    justify-content: space-between;
-    text-align: center; */
+.month2-before{
+text-align: center;
+color:#808080;
 }
 
-#title{
+.month1-before{
+    text-align: center;
+    color:#696969;
+    font-weight: bold;
+    font-size:20px;
+    }
+
+
+
+.message-wrapper{
+    text-align: center;;
+    margin-top: 40px;
+}
+
+.sub{
+    max-width:50%;
+}
+
+/* #title{
     margin-left: 15px;
     height:25px;
-}
+} */
 
 #year{
     margin-left: 15px;
@@ -76,11 +108,11 @@ h2{
     height:25px;
 }
 
-#tag{
+/* #tag{
     margin-left: 15px;
     width: 160px;
     height:25px;
-}
+} */
 
 #submit-btn{
     display: flex;
@@ -110,6 +142,7 @@ h2{
     border-radius: 10px;
     cursor: pointer;
     box-shadow: 0px 5px 15px 0px #a9a9a9;
+    margin-top:15px;
   
 }
 
@@ -117,7 +150,7 @@ h2{
     display: flex;
     justify-content: right;
     padding-right: 20px;
-    
+    margin:0;
 }
 
 .tree{
@@ -130,6 +163,114 @@ h2{
 
 
 /* 1month summary.php */
+main{
+    width:100%;
+   background-image:url(../img/leaves3_small.png);
+   /* background-size:cover; */
+   background-repeat: no-repeat;
+} 
+
+.sub-title{
+    width: 40%;
+    font-size: 20px;
+    color:#006400;
+    font-weight:bold;
+    text-align: center;
+    margin:auto;
+    margin-top:50px;
+    background: linear-gradient(transparent 60%, #eee8aa 40%);
+}
+
+#chart{
+    max-width: 800px;
+    /* margin:auto; */
+    margin:10px 30px 0px 0px;
+}
+
+.message-wrapper-cum{
+    /* align-self:center; */
+    text-align: center;
+    margin-top: 60px;
+}
+
+
+/* 3month summary.php */
+.bill-outer{
+    display: flex;
+    justify-content:space-evenly;
+    margin-top:30px;
+}
+
+.bill-wrapper{
+    justify-content:left;
+    align-items: center;
+    /* width:90%;
+    margin:20px 0px 20px 0px; */
+}
+
+#bill-chart{
+    max-width: 40%;
+    /* margin:auto; */
+    margin-top:30px; 
+}
+
+
+.recommend{
+    margin-top: 20px;
+}
+
+#emission{
+    text-align: center;
+}
+
+
+
+.centering{
+    height: 25px;
+    width:100px;
+    margin: auto;
+    text-align: center;
+    border: none;
+    color: #ffffff;
+    background-color: #5f9ea0;
+    border-radius: 10px;
+    cursor: pointer;
+    box-shadow: 0px 5px 15px 0px #a9a9a9;
+}
+
+.outstand{
+    color:#0000cd;
+    font-size: 20px;
+    font-weight:bold;
+
+}
+
+.comparison-title{
+    width: 300px;
+    font-size: 20px;
+    color:#006400;
+    font-weight:bold;
+    margin:auto;
+    text-align: center;
+    margin-top:50px;
+    margin-bottom: 20px;
+    background: linear-gradient(transparent 60%, #eee8aa 40%);
+}
+
+.comparison{
+    margin-top:30px;
+    width: 900px;
+    margin:auto;
+}
+
+.login{
+    background-image: url(../img/tree.png);
+       background-size:cover;
+   background-repeat: no-repeat;
+}
+
+
+
 
 .summary{
     max-width:900px;
@@ -140,20 +281,16 @@ h2{
 }
 
 .result{
-    max-width:1200px;
+    width:1500px;
 }
 
-#chart{
-    max-width: 800px;
-    margin:auto;
-    margin-top:30px;
-}
+
 
 th{
     /* width:10%; */
     font-size:16px;
-    color:#fff;
-    background-color:#3cb371;
+    color:#696969;
+    background-color:#90ee90;
     border:1px solid #a9a9a9;
     border-bottom: 1px solid #a9a9a9;
     border-right: 1px solid #a9a9a9; 
@@ -177,68 +314,33 @@ td{
     justify-content: center;
     width:100%;
     margin: auto;
+    margin-top: 20px;
 }
 
 .return{
-    display: flex;
-    justify-content:center;
-    /* max-width:100%; */
+    /* display: flex;
+    justify-content:center; */
+   margin:auto;
     font-size: 15px;
-    text-align: center;
     margin-top: 50px;
 }
 
-
-/* 3month summary.php */
-.bill-wrapper{
-    display: flex;
-    justify-content:center;
-    width:90%;
-    margin:20px 0px 20px 0px;
-    /* padding: 20px; */
-}
-
-.arrow{
-    margin:20px;
-}
-
-#emission{
-    text-align: center;
-}
-
-.flex{
-    display: flex;
-    justify-content: center;
-    align-items: center;
-}
-
-.centering{
-    height: 25px;
-    width:100px;
-    margin: auto;
-    text-align: center;
-    border: none;
-    color: #ffffff;
-    background-color: #5f9ea0;
-    border-radius: 10px;
-    cursor: pointer;
-    box-shadow: 0px 5px 15px 0px #a9a9a9;
-}
-
-.outstand{
-    color:#0000cd;
+/* select month.php */
+.select-title{
+    width: 400px;
     font-size: 20px;
+    color:#006400;
     font-weight:bold;
-
-}
-
-.comparison{
-    width: 900px;
     margin:auto;
+    text-align: center;
+    margin-top:50px;
+    margin-bottom: 20px;
+    background: linear-gradient(transparent 60%, #eee8aa 40%);
 }
 
-.login{
-    background-image: url(../img/tree.png);
-       background-size:cover;
-   background-repeat: no-repeat;
+.chart-center{
+    /* max-width: 800px; */
+   justify-content: center;
+   text-align: center;
+    /* margin:10px 30px 0px 0px; */
 }

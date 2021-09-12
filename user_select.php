@@ -51,25 +51,24 @@ if ($status == false) {
     <title>ユーザー管理</title>
 </head>
 <body>
+    <p class="summary">登録済みユーザー一覧</p> 
+    <table class="result" border="1">
+        <tr>
+        <th>名前</th>
+        <th>ログインID</th>
+        <th>管理者<br>ステータス</th>
+        <th>入・退会</th>
+        <th>電力メニュー</th>
+        <th>契約アンペア</th>
+        <th>データ粒度</th>
+        <th>編集</th>
+        <th>削除</th>
+        </tr>
+        <?= $view ?>
+    </table>
 
-<p class="summary">登録済みユーザー一覧</p> 
+    <p class="return"><a href="user_index.php">新規登録画面</a></p>
+    <p class="return"><a href="index.php">トップに戻る</a></p>
 
-<table class="result" border="1">
-    <tr>
-    <th>名前</th>
-	<th>ログインID</th>
-	<th>管理者ステータス</th>
-	<th>入・退会</th>
-    <th>電力メニュー</th>
-    <th>契約アンペア</th>
-    <th>データ粒度</th>
-    <th>編集</th>
-    <th>削除</th>
-    </tr>
-    <?= $view ?>
-</table>
-
-<p class="return"><a href="user_index.php">新規登録画面</a></p>
-<p class="return"><a href="index.php">目次に戻る</a></p>
 </body>
 </html>

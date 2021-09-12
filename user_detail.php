@@ -50,13 +50,13 @@ if ($status == false) {
         </p>
         <select name ="plan" id="plan" value = "<?=$result['plan']?>">
             <option value="tepco_standard">東京電力標準</option>
-            <option value="tepco_night8">東京電力夜間パック</option>
+            <option value="tepco_night8">東京電力夜トク</option>
             <option value="kddi">auでんき</option>
             <option value="softbank">ソフトバンクでんき</option>
             <option value="tokyogas">東京ガス</option>
-            <option value="rakuten">楽天でんき</option>
-            <option value="eneos">ENEOSでんき</option>
             <option value="looop">looopでんき</option>
+            <option value="eneos">ENEOSでんき</option>
+            <option value="mcre">まちエネ</option>
         </select>
         <p class="centering">契約アンペア：<input type="text" name="ampere" value = "<?=$result['ampere']?>" id="ampere"></p>
         <p>データ粒度</p>

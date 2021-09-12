@@ -93,10 +93,6 @@ if($row3 = $stmt3 -> fetch()){
 $wh_last_month_r = round($wh_last_month);
 
 //2か月前の使用量合計
-// $two_month_before= $this_this_month - 2;
-// $month_two  = $this_year.'-'.$two_month_before.'-'.'1';
-// $end_month_two = date('Y-m-d H:i:s', strtotime('last day of '. $month_two.'23:59:59'));
-
 $two_month_before = date('Y-m-d H:i:s', strtotime(date('Y-m-1') . '-2 month'));
 $end_month_two = date('Y-m-d 23:59:59', strtotime('last day of '. $two_month_before));
 if($polling == "1min"){
@@ -111,12 +107,6 @@ if($row4 = $stmt4 -> fetch()){
     }
 
 //3か月前の使用量合計
-// $this_month = date('m', strtotime('this month')) ;
-// $this_year =  date('Y', strtotime('this month')) ;
-// $three_month_before= $this_this_month - 3;
-// $month_three  = $this_year.'-'.$three_month_before.'-'.'1';
-// $end_month_three = date('Y-m-d H:i:s', strtotime('last day of '. $month_three.'23:59:59'));
-
 $three_month_before = date('Y-m-d H:i:s', strtotime(date('Y-m-1') . '-3 month'));
 $end_month_three = date('Y-m-d 23:59:59', strtotime('last day of '. $three_month_before));
 if($polling == "1min"){
@@ -139,13 +129,19 @@ if($row20 = $stmt20 -> fetch()){
 //先月の排出量
 $emission_last_month = $wh_last_month * $emission_rate;
 
-//先々月の排出量
+//２か月前の排出量と差分の計算
 $emission_two_month_before = $wh_two_month_before * $emission_rate;
 $emission_comparison = round(abs($emission_last_month - $emission_two_month_before));
 
 if ($emission_last_month < $emission_two_month_before){
     $message = "トン減りました";
 }
+
+//3か月前の排出量
+$emission_three_month_before = $wh_three_month_before * $emission_rate;
+
+//再エネ賦課金単価を定義
+$re = 3.36 ;
 
 //時間帯別料金との分岐点
 
@@ -168,7 +164,7 @@ if ($plan == "tepco_night8"){
 
     $status = $stmt9->execute();
     if($row9 = $stmt9 -> fetch()){
-        $bill_this_month = round($row9['bill']+ $fixed);
+        $bill_this_month = round($row9['bill']+ $fixed + $re*$wh_this_month);
         }
 
     //先月の電気料金（時間帯別単価の場合）
@@ -189,7 +185,7 @@ if ($plan == "tepco_night8"){
     $status = $stmt10->execute();
 
     if($row10 = $stmt10 -> fetch()){
-        $last_month_bill = round($row10['bill'] + $fixed);
+        $last_month_bill = round($row10['bill'] + $fixed+ $re*$wh_last_month);
         }
 
     //2か月前の電気料金（時間帯別単価の場合）
@@ -210,10 +206,10 @@ if ($plan == "tepco_night8"){
     $status = $stmt10->execute();
 
     if($row10 = $stmt10 -> fetch()){
-        $bill_two_month_before = round($row10['bill'] + $fixed);
+        $bill_two_month_before = round($row10['bill'] + $fixed + $re*$wh_two_month_before);
         }
 
-    //3か月月の電気料金（時間帯別単価の場合）
+    //3か月前の電気料金（時間帯別単価の場合）
     $stmt15 =$pdo->prepare 
     ("SELECT 
     sum(tepco_night8.var_s1 * $table_name.wh/1000/60) AS bill
@@ -231,7 +227,7 @@ if ($plan == "tepco_night8"){
     $status = $stmt15->execute();
 
     if($row15 = $stmt15 -> fetch()){
-        $bill_three_month_before = round($row15['bill']+ $fixed);
+        $bill_three_month_before = round($row15['bill']+ $fixed + $re*$wh_three_month_before);
         }
 
 } else {
@@ -239,83 +235,83 @@ if ($plan == "tepco_night8"){
         // 今月の電気代取得
     if($plan == "tokyogas"){
         if ($wh_this_month < 140) {
-            $this_month_bill = round($fixed + $wh_this_month * $var_s1);
+            $this_month_bill = round($fixed + $wh_this_month * $var_s1+ $re*$wh_this_month);
         } else if ($wh_this_month < 350){
-            $this_month_bill = round($fixed + 140 * $var_s1 + ($wh_this_month-140) * $var_s2);
+            $this_month_bill = round($fixed + 140 * $var_s1 + ($wh_this_month-140) * $var_s2+ $re*$wh_this_month);
         } else {
-            $this_month_bill = round($fixed + 140 * $var_s1 + (350 - 140) *$var_s2 +($wh_this_month-350) * $var_s3);
+            $this_month_bill = round($fixed + 140 * $var_s1 + (350 - 140) *$var_s2 +($wh_this_month-350) * $var_s3+ $re*$wh_this_month);
         };
 
         // 先月の電気代取得
         if ($wh_last_month < 140) {
-            $last_month_bill = round($fixed + $wh_last_month * $var_s1);
+            $last_month_bill = round($fixed + $wh_last_month * $var_s1+ $re*$wh_last_month);
         } else if ($wh_last_month < 350){
-            $last_month_bill = round($fixed + 140 * $var_s1 + ($wh_last_month-140) * $var_s2);
+            $last_month_bill = round($fixed + 140 * $var_s1 + ($wh_last_month-140) * $var_s2+ $re*$wh_last_month);
         } else {
-            $last_month_bill = round($fixed + 140 * $var_s1 + (350 - 140) *$var_s2 +($wh_last_month-350) * $var_s3);
+            $last_month_bill = round($fixed + 140 * $var_s1 + (350 - 140) *$var_s2 +($wh_last_month-350) * $var_s3+ $re*$wh_last_month);
         }
 
         // 2か月前の電気代取得
         if ($wh_two_month_before < 140) {
-            $bill_two_month_before = round($fixed + $wh_two_month_before * $var_s1);
+            $bill_two_month_before = round($fixed + $wh_two_month_before * $var_s1+ + $re*$wh_two_month_before);
         } else if ($wh_two_month_before < 350){
-            $bill_two_month_before = round($fixed + 140 * $var_s1 + ($wh_two_month_before-140) * $var_s2);
+            $bill_two_month_before = round($fixed + 140 * $var_s1 + ($wh_two_month_before-140) * $var_s2 + $re*$wh_two_month_before);
         } else {
-            $bill_two_month_before = round($fixed + 140 * $var_s1 + (350 - 140) *$var_s2 +($wh_two_month_before-350) * $var_s3);
+            $bill_two_month_before = round($fixed + 140 * $var_s1 + (350 - 140) *$var_s2 +($wh_two_month_before-350) * $var_s3 + $re*$wh_two_month_before);
         }    
 
         // 3か月前の電気代取得
         if ($wh_three_month_before < 140) {
-            $bill_three_month_before = round($fixed + $wh_three_month_before * $var_s1);
+            $bill_three_month_before = round($fixed + $wh_three_month_before * $var_s1 + $re*$wh_three_month_before);
         } else if ($wh_three_month_before < 350){
-            $bill_three_month_before = round($fixed + 140 * $var_s1 + ($wh_three_month_before-140) * $var_s2);
+            $bill_three_month_before = round($fixed + 140 * $var_s1 + ($wh_three_month_before-140) * $var_s2 + $re*$wh_three_month_before);
         } else {
-            $bill_three_month_before = round($fixed + 140 * $var_s1 + (350 - 140) *$var_s2 +($wh_three_month_before-350) * $var_s3);
+            $bill_three_month_before = round($fixed + 140 * $var_s1 + (350 - 140) *$var_s2 +($wh_three_month_before-350) * $var_s3 + $re*$wh_three_month_before);
         }    
     
     } else {
         if ($wh_this_month < 120) {
-            $this_month_bill = round($fixed + $wh_this_month * $var_s1);
+            $this_month_bill = round($fixed + $wh_this_month * $var_s1+ $re*$wh_this_month);
         } else if ($wh_this_month < 300){
-            $this_month_bill = round($fixed + 120 * $var_s1 + ($wh_this_month-120) * $var_s2);
+            $this_month_bill = round($fixed + 120 * $var_s1 + ($wh_this_month-120) * $var_s2+ $re*$wh_this_month);
         } else {
-            $this_month_bill = round($fixed + 120 * $var_s1 + (300 - 120) *$var_s2 +($wh_this_month-300) * $var_s3);
+            $this_month_bill = round($fixed + 120 * $var_s1 + (300 - 120) *$var_s2 +($wh_this_month-300) * $var_s3+ $re*$wh_this_month);
         };
 
         // 先月の電気代取得
         if ($wh_last_month < 120) {
-            $last_month_bill = round($fixed + $wh_last_month * $var_s1);
+            $last_month_bill = round($fixed + $wh_last_month * $var_s1+ $re*$wh_last_month);
         } else if ($wh_last_month < 300){
-            $last_month_bill = round($fixed + 120 * $var_s1 + ($wh_last_month-120) * $var_s2);
+            $last_month_bill = round($fixed + 120 * $var_s1 + ($wh_last_month-120) * $var_s2+ $re*$wh_last_month);
         } else {
-            $last_month_bill = round($fixed + 120 * $var_s1 + (300 - 120) *$var_s2 +($wh_last_month-300) * $var_s3);
+            $last_month_bill = round($fixed + 120 * $var_s1 + (300 - 120) *$var_s2 +($wh_last_month-300) * $var_s3+ $re*$wh_last_month);
         }
 
         // 2か月前の電気代取得
         if ($wh_two_month_before < 120) {
-            $bill_two_month_before = round($fixed + $wh_two_month_before * $var_s1);
+            $bill_two_month_before = round($fixed + $wh_two_month_before * $var_s1 + $re*$wh_two_month_before);
         } else if ($wh_two_month_before < 300){
-            $bill_two_month_before = round($fixed + 120 * $var_s1 + ($wh_two_month_before-120) * $var_s2);
+            $bill_two_month_before = round($fixed + 120 * $var_s1 + ($wh_two_month_before-120) * $var_s2 + $re*$wh_two_month_before);
         } else {
-            $bill_two_month_before = round($fixed + 120 * $var_s1 + (300 - 120) *$var_s2 +($wh_two_month_before-300) * $var_s3);
+            $bill_two_month_before = round($fixed + 120 * $var_s1 + (300 - 120) *$var_s2 +($wh_two_month_before-300) * $var_s + $re*$wh_two_month_before3);
         }    
 
         // 3か月前の電気代取得
         if ($wh_three_month_before < 120) {
-            $bill_three_month_before = round($fixed + $wh_three_month_before * $var_s1);
+            $bill_three_month_before = round($fixed + $wh_three_month_before * $var_s1 + $re*$wh_three_month_before);
         } else if ($wh_three_month_before < 300){
-            $bill_three_month_before = round($fixed + 120 * $var_s1 + ($wh_three_month_before-120) * $var_s2);
+            $bill_three_month_before = round($fixed + 120 * $var_s1 + ($wh_three_month_before-120) * $var_s2 + $re*$wh_three_month_before);
         } else {
-            $bill_three_month_before = round($fixed + 120 * $var_s1 + (300 - 120) *$var_s2 +($wh_three_month_before-300) * $var_s3);
+            $bill_three_month_before = round($fixed + 120 * $var_s1 + (300 - 120) *$var_s2 +($wh_three_month_before-300) * $var_s3 + $re*$wh_three_month_before);
         }    
     }
 }
 
 //user_tableに先月の電気料金を記録
-    $stmt16 = $pdo->prepare ("UPDATE ranking SET last_month_bill = $last_month_bill) WHERE id = $id");
-    $status = $stmt16->execute();
+    // $stmt16 = $pdo->prepare ("UPDATE ranking SET last_month_bill = $last_month_bill) WHERE id = $id");
+    // $status = $stmt16->execute();
 
-//過去3か月の使い方からおすすめの電力メニュー
+//過去3か月の使い方からおすすめの電力メニューとエコな電力メニュー
 //各社の料金体系で電気料金試算
 //東京電力
     //基本料金取得
@@ -349,36 +345,46 @@ if ($plan == "tepco_night8"){
     if($row20 = $stmt20 -> fetch()){
         $var_s3_tepco_standard = $row20['var_s3'];
         }
-    
+
     // 先月の電気代取得
     if ($wh_last_month < 120) {
-            $last_month_bill_tepco_standard = round($fixed_tepco_standard + $wh_last_month * $var_s1_tepco_standard);
+            $last_month_bill_tepco_standard = round($fixed_tepco_standard + $wh_last_month * $var_s1_tepco_standard+ $re*$wh_last_month);
         } else if ($wh_last_month < 300){
-            $last_month_bill_tepco_standard = round($fixed_tepco_standard + 120 * $var_s1_tepco_standard + ($wh_last_month-120) * $var_s2_tepco_standard);
+            $last_month_bill_tepco_standard = round($fixed_tepco_standard + 120 * $var_s1_tepco_standard + ($wh_last_month-120) * $var_s2_tepco_standard+ $re*$wh_last_month);
         } else {
-            $last_month_bill_tepco_standard = round($fixed_tepco_standard + 120 * $var_s1_tepco_standard + (300 - 120) *$var_s2_tepco_standard +($wh_last_month-300) * $var_s3_tepco_standard);
+            $last_month_bill_tepco_standard = round($fixed_tepco_standard + 120 * $var_s1_tepco_standard + (300 - 120) *$var_s2_tepco_standard +($wh_last_month-300) * $var_s3_tepco_standard+ $re*$wh_last_month);
         }
 
     // 2か月前の電気代取得
         if ($wh_two_month_before < 120) {
-            $bill_two_month_before_tepco_standard = round($fixed_tepco_standard + $wh_two_month_before * $var_s1_tepco_standard);
+            $bill_two_month_before_tepco_standard = round($fixed_tepco_standard + $wh_two_month_before * $var_s1_tepco_standard + $re*$wh_two_month_before );
         } else if ($wh_two_month_before < 300){
-            $bill_two_month_before_tepco_standard = round($fixed_tepco_standard + 120 * $var_s1_tepco_standard + ($wh_two_month_before-120) * $var_s2_tepco_standard);
+            $bill_two_month_before_tepco_standard = round($fixed_tepco_standard + 120 * $var_s1_tepco_standard + ($wh_two_month_before-120) * $var_s2_tepco_standard+ $re*$wh_two_month_before );
         } else {
-            $bill_two_month_before_tepco_standard = round($fixed_tepco_standard + 120 * $var_s1_tepco_standard + (300 - 120) *$var_s2_tepco_standard +($wh_two_month_before-300) * $var_s3_tepco_standard);
+            $bill_two_month_before_tepco_standard = round($fixed_tepco_standard + 120 * $var_s1_tepco_standard + (300 - 120) *$var_s2_tepco_standard +($wh_two_month_before-300) * $var_s3_tepco_standard+ $re*$wh_two_month_before );
         }    
 
     // 3か月前の電気代取得
         if ($wh_three_month_before < 120) {
-            $bill_three_month_before_tepco_standard = round($fixed_tepco_standard + $wh_three_month_before * $var_s1_tepco_standard);
+            $bill_three_month_before_tepco_standard = round($fixed_tepco_standard + $wh_three_month_before * $var_s1_tepco_standard + $re*$wh_three_month_before);
         } else if ($wh_three_month_before < 300){
-            $bill_three_month_before_tepco_standard = round($fixed_tepco_standard + 120 * $var_s1_tepco_standard + ($wh_three_month_before-120) * $var_s2_tepco_standard);
+            $bill_three_month_before_tepco_standard = round($fixed_tepco_standard + 120 * $var_s1_tepco_standard + ($wh_three_month_before-120) * $var_s2_tepco_standard + $re*$wh_three_month_before);
         } else {
-            $bill_three_month_before_tepco_standard = round($fixed_tepco_standard + 120 * $var_s1_tepco_standard + (300 - 120) *$var_s2_tepco_standard +($wh_three_month_before-300) * $var_s3_tepco_standard);
+            $bill_three_month_before_tepco_standard = round($fixed_tepco_standard + 120 * $var_s1_tepco_standard + (300 - 120) *$var_s2_tepco_standard +($wh_three_month_before-300) * $var_s3_tepco_standard + $re*$wh_three_month_before);
         } 
     
     //3か月の平均電気代
     $result_tepco_standard = round(($last_month_bill_tepco_standard + $bill_two_month_before_tepco_standard + $bill_three_month_before_tepco_standard)/3);
+    
+    //排出係数
+    $stmt41 =$pdo->prepare ("SELECT rate FROM emission WHERE plan = 'tepco_standard' ");
+    $status = $stmt41->execute();
+    if($row41 = $stmt41 -> fetch()){
+        $emission_rate_tepco = $row41['rate']*1000;
+        }
+    //３か月のCO2排出量計
+    $emission_tepco_standard = ($wh_last_month + $wh_two_month_before + $wh_three_month_before) * $emission_rate_tepco;
+    
 
 //東京電力夜間
 
@@ -418,95 +424,114 @@ if ($plan == "tepco_night8"){
 
     // 先月の電気代取得
     if ($wh_last_month < 140) {
-        $last_month_bill_tokyogas = round($fixed_tokyogas + $wh_last_month * $var_s1_tokyogas);
+        $last_month_bill_tokyogas = round($fixed_tokyogas + $wh_last_month * $var_s1_tokyogas+$re*$wh_last_month);
     } else if ($wh_last_month < 350){
-        $last_month_bill_tokyogas = round($fixed_tokyogas + 140 * $var_s1_tokyogas + ($wh_last_month-140) * $var_s2_tokyogas);
+        $last_month_bill_tokyogas = round($fixed_tokyogas + 140 * $var_s1_tokyogas + ($wh_last_month-140) * $var_s2_tokyogas+$re*$wh_last_month);
     } else {
-        $last_month_bill_tokyogas = round($fixed_tokyogas + 140 * $var_s1_tokyogas + (350 - 140) *$var_s2_tokyogas +($wh_last_month-350) * $var_s3_tokyogas);
+        $last_month_bill_tokyogas = round($fixed_tokyogas + 140 * $var_s1_tokyogas + (350 - 140) *$var_s2_tokyogas +($wh_last_month-350) * $var_s3_tokyogas+$re*$wh_last_month);
     }
     //2か月前の電気代取得
     if ($wh_two_month_before < 140) {
-        $bill_two_month_before_tokyogas = round($fixed_tokyogas + $wh_two_month_before * $var_s1_tokyogas);
+        $bill_two_month_before_tokyogas = round($fixed_tokyogas + $wh_two_month_before * $var_s1_tokyogas+ $re*$wh_two_month_before );
     } else if ($wh_two_month_before < 350){
-        $bill_two_month_before_tokyogas = round($fixed_tokyogas + 140 * $var_s1_tokyogas + ($wh_two_month_before-140) * $var_s2_tokyogas);
+        $bill_two_month_before_tokyogas = round($fixed_tokyogas + 140 * $var_s1_tokyogas + ($wh_two_month_before-140) * $var_s2_tokyogas+ $re*$wh_two_month_before );
     } else {
-        $bill_two_month_before_tokyogas = round($fixed_tokyogas + 140 * $var_s1_tokyogas + (350 - 140) *$var_s2_tokyogas +($wh_two_month_before-350) * $var_s3_tokyogas);
+        $bill_two_month_before_tokyogas = round($fixed_tokyogas + 140 * $var_s1_tokyogas + (350 - 140) *$var_s2_tokyogas +($wh_two_month_before-350) * $var_s3_tokyogas+ $re*$wh_two_month_before );
     }    
 
     // 3か月前の電気代取得
     if ($wh_three_month_before < 140) {
-        $bill_three_month_before_tokyogas = round($fixed_tokyogas + $wh_three_month_before * $var_s1_tokyogas);
+        $bill_three_month_before_tokyogas = round($fixed_tokyogas + $wh_three_month_before * $var_s1_tokyogas + $re*$wh_three_month_before);
     } else if ($wh_three_month_before < 350){
-        $bill_three_month_before_tokyogas = round($fixed_tokyogas + 140 * $var_s1_tokyogas + ($wh_three_month_before-140) * $var_s2_tokyogas);
+        $bill_three_month_before_tokyogas = round($fixed_tokyogas + 140 * $var_s1_tokyogas + ($wh_three_month_before-140) * $var_s2_tokyogas + $re*$wh_three_month_before);
     } else {
-        $bill_three_month_before_tokyogas = round($fixed_tokyogas + 140 * $var_s1_tokyogas + (350 - 140) *$var_s2_tokyogas +($wh_three_month_before-350) * $var_s3_tokyogas);
+        $bill_three_month_before_tokyogas = round($fixed_tokyogas + 140 * $var_s1_tokyogas + (350 - 140) *$var_s2_tokyogas +($wh_three_month_before-350) * $var_s3_tokyogas + $re*$wh_three_month_before);
     } 
 
     //3か月の平均電気代
     $result_tokyogas = round(($last_month_bill_tokyogas + $bill_two_month_before_tokyogas + $bill_three_month_before_tokyogas)/3);
 
-//楽天でんき
+    //排出係数
+    $stmt42 =$pdo->prepare ("SELECT rate FROM emission WHERE plan = 'tokyogas' ");
+    $status = $stmt42->execute();
+    if($row42 = $stmt42 -> fetch()){
+        $emission_rate_tokyogas = $row42['rate']*1000;
+        }
+    //３か月のCO2排出量計
+    $emission_tokyogas = ($wh_last_month + $wh_two_month_before + $wh_three_month_before) * $emission_rate_tokyogas;
+
+
+//まちエネ
     //基本料金取得
     $stmt25 = $pdo->prepare 
-    ("SELECT fixed FROM rakuten WHERE plot_date_time = '00:00:00'");
+    ("SELECT fixed FROM mcre WHERE plot_date_time = '00:00:00'");
     $status = $stmt25->execute();
     if($row25 = $stmt25 -> fetch()){
-        $fixed_rakuten = $row25['fixed'] * ($ampere/10);
+        $fixed_mcre = $row25['fixed'] * ($ampere/10);
         }
 
     // 従量料金単価（１段目）取得
     $stmt26 =$pdo->prepare 
-    ("SELECT var_s1 FROM rakuten WHERE plot_date_time = '00:00:00'");
+    ("SELECT var_s1 FROM mcre WHERE plot_date_time = '00:00:00'");
     $status = $stmt26->execute();
     if($row26 = $stmt26 -> fetch()){
-        $var_s1_rakuten = $row26['var_s1'];
+        $var_s1_mcre = $row26['var_s1'];
         }
-
+      
     //従量料金単価（2段目）取得
     $stmt27 =$pdo->prepare 
-    ("SELECT var_s2 FROM rakuten WHERE plot_date_time = '00:00:00' ");
+    ("SELECT var_s2 FROM mcre WHERE plot_date_time = '00:00:00' ");
     $status = $stmt27->execute();
     if($row27 = $stmt27 -> fetch()){
-        $var_s2_rakuten = $row27['var_s2'];
+        $var_s2_mcre = $row27['var_s2'];
         }
 
     //従量料金単価（3段目）取得
     $stmt28 =$pdo->prepare 
-    ("SELECT var_s3 FROM rakuten WHERE plot_date_time = '00:00:00' ");
+    ("SELECT var_s3 FROM mcre WHERE plot_date_time = '00:00:00' ");
     $status = $stmt28->execute();
     if($row28 = $stmt28 -> fetch()){
-        $var_s3_rakuten = $row28['var_s3'];
+        $var_s3_mcre = $row28['var_s3'];
         }
 
     // 先月の電気代取得
     if ($wh_last_month < 120) {
-        $last_month_bill_rakuten = round($fixed_rakuten + $wh_last_month * $var_s1_rakuten);
+        $last_month_bill_mcre = round($fixed_mcre + $wh_last_month * $var_s1_mcre + $re*$wh_last_month);
     } else if ($wh_last_month < 300){
-        $last_month_bill_rakuten = round($fixed_rakuten + 120 * $var_s1_rakuten + ($wh_last_month-120) * $var_s2_rakuten);
+        $last_month_bill_mcre = round($fixed_mcre + 120 * $var_s1_mcre + ($wh_last_month-120) * $var_s2_mcre + $re*$wh_last_month);
     } else {
-        $last_month_bill_rakuten = round($fixed_rakuten + 120 * $var_s1_rakuten + (300 - 120) *$var_s2_rakuten +($wh_last_month-300) * $var_s3_rakuten);
+        $last_month_bill_mcre = round($fixed_mcre + 120 * $var_s1_mcre + (300 - 120) *$var_s2_mcre +($wh_last_month-300) * $var_s3_mcre + $re*$wh_last_month);
     }
 
     // 2か月前の電気代取得
     if ($wh_two_month_before < 120) {
-        $bill_two_month_before_rakuten = round($fixed_rakuten + $wh_two_month_before * $var_s1_rakuten);
+        $bill_two_month_before_mcre = round($fixed_mcre + $wh_two_month_before * $var_s1_mcre+ $re*$wh_two_month_before );
     } else if ($wh_two_month_before < 300){
-        $bill_two_month_before_rakuten = round($fixed_rakuten + 120 * $var_s1_rakuten + ($wh_two_month_before-120) * $var_s2_rakuten);
+        $bill_two_month_before_mcre = round($fixed_mcre + 120 * $var_s1_mcre + ($wh_two_month_before-120) * $var_s2_mcre+ $re*$wh_two_month_before );
     } else {
-        $bill_two_month_before_rakuten = round($fixed_rakuten + 120 * $var_s1_rakuten + (300 - 120) *$var_s2_rakuten +($wh_two_month_before-300) * $var_s3_rakuten);
+        $bill_two_month_before_mcre = round($fixed_mcre + 120 * $var_s1_mcre + (300 - 120) *$var_s2_mcre +($wh_two_month_before-300) * $var_s3_mcre+ $re*$wh_two_month_before );
     }    
 
     // 3か月前の電気代取得
     if ($wh_three_month_before < 120) {
-        $bill_three_month_before_rakuten = round($fixed_rakuten + $wh_three_month_before * $var_s1_rakuten);
+        $bill_three_month_before_mcre = round($fixed_mcre + $wh_three_month_before * $var_s1_mcre + $re*$wh_three_month_before);
     } else if ($wh_three_month_before < 300){
-        $bill_three_month_before_rakuten = round($fixed_rakuten + 120 * $var_s1_rakuten + ($wh_three_month_before-120) * $var_s2_rakuten);
+        $bill_three_month_before_mcre = round($fixed_mcre + 120 * $var_s1_mcre + ($wh_three_month_before-120) * $var_s2_mcre + $re*$wh_three_month_before);
     } else {
-        $bill_three_month_before_rakuten = round($fixed_rakuten + 120 * $var_s1_rakuten + (300 - 120) *$var_s2_rakuten +($wh_three_month_before-300) * $var_s3_rakuten);
+        $bill_three_month_before_mcre = round($fixed_mcre + 120 * $var_s1_mcre + (300 - 120) *$var_s2_mcre +($wh_three_month_before-300) * $var_s3_mcre + $re*$wh_three_month_before);
     } 
 
     //3か月の平均電気代
-    $result_rakuten = round(($last_month_bill_rakuten + $bill_two_month_before_rakuten + $bill_three_month_before_rakuten)/3);
+    $result_mcre = round(($last_month_bill_mcre + $bill_two_month_before_mcre + $bill_three_month_before_mcre)/3);
+  
+    //排出係数
+   $stmt43 =$pdo->prepare ("SELECT rate FROM emission WHERE plan = 'mcre' ");
+   $status = $stmt43->execute();
+   if($row43 = $stmt43 -> fetch()){
+       $emission_rate_mcre = $row43['rate']*1000;
+       }
+   //３か月のCO2排出量計
+   $emission_mcre = ($wh_last_month + $wh_two_month_before + $wh_three_month_before) * $emission_rate_mcre;
 
 
 //auでんき
@@ -544,33 +569,42 @@ if ($plan == "tepco_night8"){
 
     // 先月の電気代取得
     if ($wh_last_month < 120) {
-        $last_month_bill_kddi = round($fixed_kddi + $wh_last_month * $var_s1_kddi);
+        $last_month_bill_kddi = round($fixed_kddi + $wh_last_month * $var_s1_kddi + $re*$wh_last_month);
     } else if ($wh_last_month < 300){
-        $last_month_bill_kddi = round($fixed_kddi + 120 * $var_s1_kddi + ($wh_last_month-120) * $var_s2_kddi);
+        $last_month_bill_kddi = round($fixed_kddi + 120 * $var_s1_kddi + ($wh_last_month-120) * $var_s2_kddi + $re*$wh_last_month);
     } else {
-        $last_month_bill_kddi = round($fixed_kddi + 120 * $var_s1_kddi + (300 - 120) *$var_s2_kddi +($wh_last_month-300) * $var_s3_kddi);
+        $last_month_bill_kddi = round($fixed_kddi + 120 * $var_s1_kddi + (300 - 120) *$var_s2_kddi +($wh_last_month-300) * $var_s3_kddi + $re*$wh_last_month);
     }
 
     // 2か月前の電気代取得
     if ($wh_two_month_before < 120) {
-        $bill_two_month_before_kddi = round($fixed_kddi + $wh_two_month_before * $var_s1_kddi);
+        $bill_two_month_before_kddi = round($fixed_kddi + $wh_two_month_before * $var_s1_kddi+ $re*$wh_two_month_before );
     } else if ($wh_two_month_before < 300){
-        $bill_two_month_before_kddi = round($fixed_kddi + 120 * $var_s1_kddi + ($wh_two_month_before-120) * $var_s2_kddi);
+        $bill_two_month_before_kddi = round($fixed_kddi + 120 * $var_s1_kddi + ($wh_two_month_before-120) * $var_s2_kddi+ $re*$wh_two_month_before );
     } else {
-        $bill_two_month_before_kddi = round($fixed_kddi + 120 * $var_s1_kddi + (300 - 120) *$var_s2_kddi +($wh_two_month_before-300) * $var_s3_kddi);
+        $bill_two_month_before_kddi = round($fixed_kddi + 120 * $var_s1_kddi + (300 - 120) *$var_s2_kddi +($wh_two_month_before-300) * $var_s3_kddi+ $re*$wh_two_month_before );
     }    
 
     // 3か月前の電気代取得
     if ($wh_three_month_before < 120) {
-        $bill_three_month_before_kddi = round($fixed_kddi + $wh_three_month_before * $var_s1_kddi);
+        $bill_three_month_before_kddi = round($fixed_kddi + $wh_three_month_before * $var_s1_kddi + $re*$wh_three_month_before);
     } else if ($wh_three_month_before < 300){
-        $bill_three_month_before_kddi = round($fixed_kddi + 120 * $var_s1_kddi + ($wh_three_month_before-120) * $var_s2_kddi);
+        $bill_three_month_before_kddi = round($fixed_kddi + 120 * $var_s1_kddi + ($wh_three_month_before-120) * $var_s2_kddi + $re*$wh_three_month_before);
     } else {
-        $bill_three_month_before_kddi = round($fixed_kddi + 120 * $var_s1_kddi + (300 - 120) *$var_s2_kddi +($wh_three_month_before-300) * $var_s3_kddi);
+        $bill_three_month_before_kddi = round($fixed_kddi + 120 * $var_s1_kddi + (300 - 120) *$var_s2_kddi +($wh_three_month_before-300) * $var_s3_kddi + $re*$wh_three_month_before);
     } 
 
     //3か月の平均電気代
     $result_kddi = round(($last_month_bill_kddi + $bill_two_month_before_kddi + $bill_three_month_before_kddi)/3);
+
+    //排出係数
+    $stmt44 =$pdo->prepare ("SELECT rate FROM emission WHERE plan = 'kddi' ");
+    $status = $stmt44->execute();
+    if($row44 = $stmt44 -> fetch()){
+        $emission_rate_kddi = $row44['rate']*1000;
+        }
+    //３か月のCO2排出量計
+    $emission_kddi = ($wh_last_month + $wh_two_month_before + $wh_three_month_before) * $emission_rate_kddi;
 
 //Softbankでんき
     //基本料金取得
@@ -607,33 +641,42 @@ if ($plan == "tepco_night8"){
 
     // 先月の電気代取得
     if ($wh_last_month < 120) {
-        $last_month_bill_softbank = round($fixed_softbank + $wh_last_month * $var_s1_softbank);
+        $last_month_bill_softbank = round($fixed_softbank + $wh_last_month * $var_s1_softbank + $re*$wh_last_month);
     } else if ($wh_last_month < 300){
-        $last_month_bill_softbank = round($fixed_softbank + 120 * $var_s1_softbank + ($wh_last_month-120) * $var_s2_softbank);
+        $last_month_bill_softbank = round($fixed_softbank + 120 * $var_s1_softbank + ($wh_last_month-120) * $var_s2_softbank + $re*$wh_last_month);
     } else {
-        $last_month_bill_softbank = round($fixed_softbank + 120 * $var_s1_softbank + (300 - 120) *$var_s2_softbank +($wh_last_month-300) * $var_s3_softbank);
+        $last_month_bill_softbank = round($fixed_softbank + 120 * $var_s1_softbank + (300 - 120) *$var_s2_softbank +($wh_last_month-300) * $var_s3_softbank + $re*$wh_last_month);
     }
 
     // 2か月前の電気代取得
     if ($wh_two_month_before < 120) {
-        $bill_two_month_before_softbank = round($fixed_softbank + $wh_two_month_before * $var_s1_softbank);
+        $bill_two_month_before_softbank = round($fixed_softbank + $wh_two_month_before * $var_s1_softbank+ $re*$wh_two_month_before );
     } else if ($wh_two_month_before < 300){
-        $bill_two_month_before_softbank = round($fixed_softbank + 120 * $var_s1_softbank + ($wh_two_month_before-120) * $var_s2_softbank);
+        $bill_two_month_before_softbank = round($fixed_softbank + 120 * $var_s1_softbank + ($wh_two_month_before-120) * $var_s2_softbank+ $re*$wh_two_month_before );
     } else {
-        $bill_two_month_before_softbank = round($fixed_softbank + 120 * $var_s1_softbank + (300 - 120) *$var_s2_softbank +($wh_two_month_before-300) * $var_s3_softbank);
+        $bill_two_month_before_softbank = round($fixed_softbank + 120 * $var_s1_softbank + (300 - 120) *$var_s2_softbank +($wh_two_month_before-300) * $var_s3_softbank+ $re*$wh_two_month_before );
     }    
 
     // 3か月前の電気代取得
     if ($wh_three_month_before < 120) {
-        $bill_three_month_before_softbank = round($fixed_softbank + $wh_three_month_before * $var_s1_softbank);
+        $bill_three_month_before_softbank = round($fixed_softbank + $wh_three_month_before * $var_s1_softbank + $re*$wh_three_month_before);
     } else if ($wh_three_month_before < 300){
-        $bill_three_month_before_softbank = round($fixed_softbank + 120 * $var_s1_softbank + ($wh_three_month_before-120) * $var_s2_softbank);
+        $bill_three_month_before_softbank = round($fixed_softbank + 120 * $var_s1_softbank + ($wh_three_month_before-120) * $var_s2_softbank + $re*$wh_three_month_before);
     } else {
-        $bill_three_month_before_softbank = round($fixed_softbank + 120 * $var_s1_softbank + (300 - 120) *$var_s2_softbank +($wh_three_month_before-300) * $var_s3_softbank);
+        $bill_three_month_before_softbank = round($fixed_softbank + 120 * $var_s1_softbank + (300 - 120) *$var_s2_softbank +($wh_three_month_before-300) * $var_s3_softbank + $re*$wh_three_month_before);
     } 
 
     //3か月の平均電気代
     $result_softbank = round(($last_month_bill_softbank + $bill_two_month_before_softbank + $bill_three_month_before_softbank)/3);
+    
+    //排出係数
+    $stmt45 =$pdo->prepare ("SELECT rate FROM emission WHERE plan = 'softbank' ");
+    $status = $stmt45->execute();
+    if($row45 = $stmt45 -> fetch()){
+        $emission_rate_softbank = $row45['rate']*1000;
+        }
+    //３か月のCO2排出量計
+    $emission_softbank = ($wh_last_month + $wh_two_month_before + $wh_three_month_before) * $emission_rate_softbank;
 
 //looop
     //基本料金取得
@@ -670,38 +713,52 @@ if ($plan == "tepco_night8"){
 
     // 先月の電気代取得
     if ($wh_last_month < 120) {
-        $last_month_bill_looop = round($fixed_looop + $wh_last_month * $var_s1_looop);
+        $last_month_bill_looop = round($fixed_looop + $wh_last_month * $var_s1_looop + $re*$wh_last_month);
     } else if ($wh_last_month < 300){
-        $last_month_bill_looop = round($fixed_looop + 120 * $var_s1_looop + ($wh_last_month-120) * $var_s2_looop);
+        $last_month_bill_looop = round($fixed_looop + 120 * $var_s1_looop + ($wh_last_month-120) * $var_s2_looop + $re*$wh_last_month);
     } else {
-        $last_month_bill_looop = round($fixed_looop + 120 * $var_s1_looop + (300 - 120) *$var_s2_looop +($wh_last_month-300) * $var_s3_looop);
+        $last_month_bill_looop = round($fixed_looop + 120 * $var_s1_looop + (300 - 120) *$var_s2_looop +($wh_last_month-300) * $var_s3_looop + $re*$wh_last_month);
     }
 
     // 2か月前の電気代取得
     if ($wh_two_month_before < 120) {
-        $bill_two_month_before_looop = round($fixed_looop + $wh_two_month_before * $var_s1_looop);
+        $bill_two_month_before_looop = round($fixed_looop + $wh_two_month_before * $var_s1_looop+ $re*$wh_two_month_before );
     } else if ($wh_two_month_before < 300){
-        $bill_two_month_before_looop = round($fixed_looop + 120 * $var_s1_looop + ($wh_two_month_before-120) * $var_s2_looop);
+        $bill_two_month_before_looop = round($fixed_looop + 120 * $var_s1_looop + ($wh_two_month_before-120) * $var_s2_looop+ $re*$wh_two_month_before );
     } else {
-        $bill_two_month_before_looop = round($fixed_looop + 120 * $var_s1_looop + (300 - 120) *$var_s2_looop +($wh_two_month_before-300) * $var_s3_looop);
+        $bill_two_month_before_looop = round($fixed_looop + 120 * $var_s1_looop + (300 - 120) *$var_s2_looop +($wh_two_month_before-300) * $var_s3_looop+ $re*$wh_two_month_before );
     }    
 
     // 3か月前の電気代取得
     if ($wh_three_month_before < 120) {
-        $bill_three_month_before_looop = round($fixed_looop + $wh_three_month_before * $var_s1_looop);
+        $bill_three_month_before_looop = round($fixed_looop + $wh_three_month_before * $var_s1_looop + $re*$wh_three_month_before);
     } else if ($wh_three_month_before < 300){
-        $bill_three_month_before_looop = round($fixed_looop + 120 * $var_s1_looop + ($wh_three_month_before-120) * $var_s2_looop);
+        $bill_three_month_before_looop = round($fixed_looop + 120 * $var_s1_looop + ($wh_three_month_before-120) * $var_s2_looop + $re*$wh_three_month_before);
     } else {
-        $bill_three_month_before_looop = round($fixed_looop + 120 * $var_s1_looop + (300 - 120) *$var_s2_looop +($wh_three_month_before-300) * $var_s3_looop);
+        $bill_three_month_before_looop = round($fixed_looop + 120 * $var_s1_looop + (300 - 120) *$var_s2_looop +($wh_three_month_before-300) * $var_s3_looop + $re*$wh_three_month_before);
     } 
 
     //3か月の平均電気代
     $result_looop = round(($last_month_bill_looop + $bill_two_month_before_looop + $bill_three_month_before_looop)/3);
 
+    //排出係数
+    $stmt46 =$pdo->prepare ("SELECT rate FROM emission WHERE plan = 'looop' ");
+    $status = $stmt46->execute();
+    if($row46 = $stmt46 -> fetch()){
+        $emission_rate_looop = $row46['rate']*1000;
+        }
+    //３か月のCO2排出量計
+    $emission_looop = ($wh_last_month + $wh_two_month_before + $wh_three_month_before) * $emission_rate_looop;
+
+
     //比較結果
-    $cheapest_result =min($result_tepco_standard, $result_tokyogas, $result_rakuten, $result_kddi, $result_softbank, $result_looop);
+    $cheapest_result =min($result_tepco_standard, $result_tokyogas, $result_mcre, $result_kddi, $result_softbank, $result_looop);
     
-    //電気メニュー名確認
+    //eco比較結果
+    $eco_result =min($emission_tepco_standard, $emission_tokyogas, $emission_mcre, $emission_kddi, $emission_softbank, $emission_looop);
+
+
+    //電気代・電気メニュー名確認
     switch ($cheapest_result) {
         case $result_tepco_standard:
             $cheapest_result = "東京電力";
@@ -709,8 +766,8 @@ if ($plan == "tepco_night8"){
         case $result_tokyogas:
             $cheapest_result = "東京ガス";
             break;
-        case $result_rakuten:
-            $cheapest_result = "楽天でんき";
+        case $result_mcre:
+            $cheapest_result = "まちエネ";
             break;
         case $result_kddi:
             $cheapest_result = "auでんき";
@@ -720,6 +777,28 @@ if ($plan == "tepco_night8"){
             break;
         case $result_looop:
             $cheapest_result = "Looop";
+            break;
+    }
+
+    //Eco・電気メニュー名確認
+    switch ($eco_result) {
+        case $emission_tepco_standard:
+            $eco_result = "東京電力";
+            break;
+        case $emission_tokyogas:
+            $eco_result = "東京ガス";
+            break;
+        case $emission_mcre:
+            $eco_result = "まちエネ";
+            break;
+        case $emission_kddi:
+            $eco_result = "auでんき";
+            break;
+        case $emission_softbank:
+            $eco_result = "Softbankでんき";
+            break;
+        case $emission_looop:
+            $eco_result = "Looop";
             break;
     }
 
@@ -750,10 +829,56 @@ if ($plan == "tepco_night8"){
     </header>
 
 <body>
-<h2>最近のでんきの使い方は？</h2>
+
+    <div class ="bill-outer">
+        
+        <canvas id="bill-chart" height="150" width="200"></canvas>
+        <div class="bill-wrpper">
+        <h2>最近のでんきの使い方は？</h2>
+            <p class ="month2-before"><span id="three_month_before"></span>の電気料金：<?=  $bill_three_month_before ?> 円</p>
+            <p class ="month2-before"><span id="two_month_before"></span>の電気料金：<?= $bill_two_month_before ?> 円</p>
+            <p class ="month2-before"><span id="one_month_before"></span>の電気料金：<?= $last_month_bill ?> 円</p>
+         <!-- ひとことアドバイス -->
+        <div class="message-wrapper">
+            <img src="img/advice.png" alt="advice" width ="300px">
+            <div class ="recommend">最近の使い方から、<br> おすすめの電気料金メニューは        
+            <span class="outstand"><?=  $cheapest_result ?></span>です
+            <!-- 比較詳細へ。POST通信でデータ移管 -->  
+            <form method="POST" action="comparison.php">
+                <p><input type="hidden" name ="tepco_standard1" value= "<?= $last_month_bill_tepco_standard ?>"></p>
+                <p><input type="hidden" name ="tepco_standard2" value= "<?= $bill_two_month_before_tepco_standard ?>"></p>
+                <p><input type="hidden" name ="tepco_standard3" value= "<?= $bill_three_month_before_tepco_standard ?>"></p>
+                <p><input type="hidden" name ="tokyogas1" value= "<?= $last_month_bill_tokyogas ?>"></p>
+                <p><input type="hidden" name ="tokyogas2" value= "<?= $bill_two_month_before_tokyogas ?>"></p>
+                <p><input type="hidden" name ="tokyogas3" value= "<?= $bill_three_month_before_tokyogas ?>"></p>
+                <p><input type="hidden" name ="mcre1" value= "<?= $last_month_bill_mcre ?>"></p>
+                <p><input type="hidden" name ="mcre2" value= "<?= $bill_two_month_before_mcre ?>"></p>
+                <p><input type="hidden" name ="mcre3" value= "<?= $bill_three_month_before_mcre ?>"></p>
+                <p><input type="hidden" name ="kddi1" value= "<?= $last_month_bill_kddi ?>"></p>
+                <p><input type="hidden" name ="kddi2" value= "<?= $bill_two_month_before_kddi ?>"></p>
+                <p><input type="hidden" name ="kddi3" value= "<?= $bill_three_month_before_kddi ?>"></p>
+                <p><input type="hidden" name ="softbank1" value= "<?= $last_month_bill_softbank ?>"></p>
+                <p><input type="hidden" name ="softbank2" value= "<?= $bill_two_month_before_softbank ?>"></p>
+                <p><input type="hidden" name ="softbank3" value= "<?= $bill_three_month_before_softbank ?>"></p>
+                <p><input type="hidden" name ="looop1" value= "<?= $last_month_bill_looop ?>"></p>
+                <p><input type="hidden" name ="looop2" value= "<?= $bill_two_month_before_looop ?>"></p>
+                <p><input type="hidden" name ="looop3" value= "<?= $bill_three_month_before_looop ?>"></p>
+             <!-- エコデータ移管 -->  
+                <p><input type="hidden" name ="emission" value= "<?=  $eco_result ?>"></p>
+                <p class="centering"><input type="submit" id="submit" value="詳細"></p>
+            </form>
+
+            <div class ="recommend">
+                契約アンペアは適切でしょうか？確認してみましょう。
+                <p id="recent"><a href="weekly_summary.php">詳細</a></p>
+            </div>
+        </div>   
 
 
-    <div class="bill-wrapper">
+        </div>
+    </div>
+    
+    <!-- <div class="bill-wrapper">
             <table>
                     <tr>
                         <th>3か月前の電気料金</th>   
@@ -780,43 +905,12 @@ if ($plan == "tepco_night8"){
                         <td><?= $last_month_bill ?> 円</td>
                     </tr>
             </table>
-    </div>
+    </div> -->
 
-    <div id="emission"></div>
+            
 
-    <div class="flex">
-        <!-- <img src="img/leaves.png" alt="tree"> -->
-        <canvas id="chart" height="100" width="200"></canvas>
-        <!-- <img src="img/tree_small.png" alt="tree"> -->
-       
-        <div class ="recommend">最近の使い方から、<br> おすすめの電気料金メニューは・・・ 
-            <span class="outstand"><?=  $cheapest_result ?>！！</span> 
-       
-            <form method="POST" action="comparison.php">
-                <p><input type="hidden" name ="tepco_standard1" value= "<?= $last_month_bill_tepco_standard ?>"></p>
-                <p><input type="hidden" name ="tepco_standard2" value= "<?= $bill_two_month_before_tepco_standard ?>"></p>
-                <p><input type="hidden" name ="tepco_standard3" value= "<?= $bill_three_month_before_tepco_standard ?>"></p>
-                <p><input type="hidden" name ="tokyogas1" value= "<?= $last_month_bill_tokyogas ?>"></p>
-                <p><input type="hidden" name ="tokyogas2" value= "<?= $bill_two_month_before_tokyogas ?>"></p>
-                <p><input type="hidden" name ="tokyogas3" value= "<?= $bill_three_month_before_tokyogas ?>"></p>
-                <p><input type="hidden" name ="rakuten1" value= "<?= $last_month_bill_rakuten ?>"></p>
-                <p><input type="hidden" name ="rakuten2" value= "<?= $bill_two_month_before_rakuten ?>"></p>
-                <p><input type="hidden" name ="rakuten3" value= "<?= $bill_three_month_before_rakuten ?>"></p>
-                <p><input type="hidden" name ="kddi1" value= "<?= $last_month_bill_kddi ?>"></p>
-                <p><input type="hidden" name ="kddi2" value= "<?= $bill_two_month_before_kddi ?>"></p>
-                <p><input type="hidden" name ="kddi3" value= "<?= $bill_three_month_before_kddi ?>"></p>
-                <p><input type="hidden" name ="softbank1" value= "<?= $last_month_bill_softbank ?>"></p>
-                <p><input type="hidden" name ="softbank2" value= "<?= $bill_two_month_before_softbank ?>"></p>
-                <p><input type="hidden" name ="softbank3" value= "<?= $bill_three_month_before_softbank ?>"></p>
-                <p><input type="hidden" name ="looop1" value= "<?= $last_month_bill_looop ?>"></p>
-                <p><input type="hidden" name ="looop2" value= "<?= $bill_two_month_before_looop ?>"></p>
-                <p><input type="hidden" name ="looop3" value= "<?= $bill_three_month_before_looop ?>"></p>
-                <p class="centering"><input type="submit" id="submit" value="詳細"></p>
-            </form>
-        </div>
-    </div>
+<!-- <p class="return"><a href="index.php">トップに戻る</a></p> -->
 
-<p class="return"><a href="index.php">トップに戻る</a></p>
 </main>
 
 
@@ -839,6 +933,11 @@ let one_month_before = year+'/'+ (month - 1);
 let two_month_before = year+'/'+ (month - 2);
 let three_month_before = year+'/'+ (month - 3);
 
+//月表示
+$("#one_month_before").html(one_month_before); 
+$("#two_month_before").html(two_month_before); 
+$("#three_month_before").html(three_month_before); 
+
 //CO2排出量メッセージ
 let emission_comparison = <?= $emission_comparison ?>;
 let emission_last_month = <?= $emission_last_month ?>;
@@ -859,17 +958,17 @@ jQuery (function ()
         responsive : true
         }
 
-    const context = jQuery("#chart")
+    const context = jQuery("#bill-chart")
     const chart = new Chart(context,config)
 })
 
 const barChartData = {
-    labels : [three_month_before, two_month_before, one_month_before, this_month],
+    labels : [three_month_before, two_month_before, one_month_before],
     datasets : [
         {
         label: "電気使用量(kWh)",
         backgroundColor: "rgba(60,179,113,0.5)",
-        data : [<?= $wh_three_month_before ?>,<?= $wh_two_month_before ?>,<?= $wh_last_month_r ?>,<?= $wh_this_month_r ?>]
+        data : [<?= $wh_three_month_before ?>,<?= $wh_two_month_before ?>,<?= $wh_last_month_r ?>]
         },   
     ]
 }

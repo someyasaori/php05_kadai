@@ -9,16 +9,22 @@
 </head>
 <body>
 
-<h1>ログイン画面</h1>
-
-    <form method="POST" action="login_act.php">
-        <p class="centering">ID：<input type="text" name="lid" id="lid"></p>
-        <p class="centering">パスワード：<input type="text" name="lpw" id="lpw"></p>
-        <p class="centering"><input type="submit" id="submit" value="ログイン"></p>
-    </form>
-    <div class ="tree">
-        <img src="img/tree.png" alt="tree"><img src="img/tree.png" alt="tree"><img src="img/tree.png" alt="tree">
+<h1>でんきの使い方診断アプリ
+<br>    
+～あなたのでんきの使い方は？～</h1>
+<div class="login-outer">
+    <div class ="tree-index">
+            <img src="img/big_tree_r.png" alt="tree" width="500px">
     </div>
+    <div class="login-wrapper">
+    <h2>ログインしてください</h2>
+        <form method="POST" action="login_act.php">
+            <p class="righting">ID：<input type="text" name="lid" id="lid"></p>
+            <p class="righting">パスワード：<input type="text" name="lpw" id="lpw"></p>
+            <p class="righting"><input type="submit" id="submit" value="ログイン"></p>
+        </form>
+    </div>
+</div>   
 
 </body>
 </html>

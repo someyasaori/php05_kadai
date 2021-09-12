@@ -14,7 +14,7 @@ if(isset($_COOKIE[session_name()])) {
 session_destroy();
 
 //上記処理後index.phpへリダイレクト
-header("Location: index.php");
+header("Location: login.php");
 exit();
 
 

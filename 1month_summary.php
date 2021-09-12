@@ -87,7 +87,7 @@ if ($status == false) {
 $json_array = json_encode($daily_sum);
 
 
-//今月の累積wh計算。まず前月までの合計値を計算
+//今月の累積wh計算。まず前月までの合計値を計算。
 if($polling == "1min"){
     $stmt16 =$pdo->prepare 
     ("SELECT SUM(wh/1000/60) as precum_sum FROM $table_name WHERE wh>0 AND plot_date_time <= '$this_month'");
@@ -134,6 +134,7 @@ if ($status == false) {
 //配列をJSON形式に変更    
 $json_array2 = json_encode($cum_sum);
 
+
 //先月の累積wh計算。まず先々月までの合計値を計算
 if($polling == "1min"){
     $stmt18 =$pdo->prepare 
@@ -178,7 +179,7 @@ if ($status == false) {
     $cum_sum_last = $stmt19->fetchAll();
     }
 
-//配列をJSON形式に変更    
+//配列をJSON形式に変更。日付表示を「日」だけにしたいがうまくいかない…    
 $json_array3 = json_encode($cum_sum_last);
 
 
@@ -235,7 +236,7 @@ if($row9 = $stmt9 -> fetch()){
     }
 
     
-//先月の電気料金（時間帯別単価の場合）
+//先月の電気料金（時間帯別単価の場合）全て再エネ賦課金追加
 $stmt10 =$pdo->prepare 
 ("SELECT 
    sum(tepco_night8.var_s1 * $table_name.wh/(1000*60)) AS bill
@@ -253,47 +254,64 @@ BETWEEN
 $status = $stmt10->execute();
 
 if($row10 = $stmt10 -> fetch()){
-    $last_month_bill = round($row10['bill'] + $fixed);
+    $last_month_bill = round($row10['bill'] + $fixed +3.36*$wh_this_month);
     }
 } else {
     //東京ガスは従量バーが違う
     if($plan =="tokyogas"){
         // 今月の電気代取得
         if ($wh_this_month < 140) {
-            $this_month_bill = round($fixed + $wh_this_month * $var_s1);
+            $this_month_bill = round($fixed + $wh_this_month * $var_s1 + 3.36*$wh_this_month);
         } else if ($wh_this_month < 350){
-            $this_month_bill = round($fixed + 140 * $var_s1 + ($wh_this_month-140) * $var_s2);
+            $this_month_bill = round($fixed + 140 * $var_s1 + ($wh_this_month-140) * $var_s2 + 3.36*$wh_this_month);
         } else {
-            $this_month_bill = round($fixed + 140 * $var_s1 + (350 - 140) *$var_s2 +($wh_this_month-350) * $var_s3);
+            $this_month_bill = round($fixed + 140 * $var_s1 + (350 - 140) *$var_s2 +($wh_this_month-350) * $var_s3 +3.36*$wh_this_month);
         }
 
         // 先月の電気代取得
         if ($wh_last_month < 140) {
-            $last_month_bill = round($fixed + $wh_last_month * $var_s1);
+            $last_month_bill = round($fixed + $wh_last_month * $var_s1+3.36*$wh_last_month);
         } else if ($wh_this_month < 300){
-            $last_month_bill = round($fixed + 140 * $var_s1 + ($wh_last_month-140) * $var_s2);
+            $last_month_bill = round($fixed + 140 * $var_s1 + ($wh_last_month-140) * $var_s2+3.36*$wh_last_month);
         } else {
-            $last_month_bill = round($fixed + 140 * $var_s1 + (350 - 140) *$var_s2 +($wh_last_month-350) * $var_s3);
+            $last_month_bill = round($fixed + 140 * $var_s1 + (350 - 140) *$var_s2 +($wh_last_month-350) * $var_s3+3.36*$wh_last_month);
         }
     } else {
         // 今月の電気代取得
         if ($wh_this_month < 120) {
-            $this_month_bill = round($fixed + $wh_this_month * $var_s1);
+            $this_month_bill = round($fixed + $wh_this_month * $var_s1+3.36*$wh_this_month);
         } else if ($wh_this_month < 300){
-            $this_month_bill = round($fixed + 120 * $var_s1 + ($wh_this_month-120) * $var_s2);
+            $this_month_bill = round($fixed + 120 * $var_s1 + ($wh_this_month-120) * $var_s2+3.36*$wh_this_month);
         } else {
-            $this_month_bill = round($fixed + 120 * $var_s1 + (300 - 120) *$var_s2 +($wh_this_month-300) * $var_s3);
+            $this_month_bill = round($fixed + 120 * $var_s1 + (300 - 120) *$var_s2 +($wh_this_month-300) * $var_s3+3.36*$wh_this_month);
         }
 
         // 先月の電気代取得
         if ($wh_last_month < 120) {
-            $last_month_bill = round($fixed + $wh_last_month * $var_s1);
+            $last_month_bill = round($fixed + $wh_last_month * $var_s1+3.36*$wh_last_month);
         } else if ($wh_this_month < 300){
-            $last_month_bill = round($fixed + 120 * $var_s1 + ($wh_last_month-120) * $var_s2);
+            $last_month_bill = round($fixed + 120 * $var_s1 + ($wh_last_month-120) * $var_s2+3.36*$wh_last_month);
         } else {
-            $last_month_bill = round($fixed + 120 * $var_s1 + (300 - 120) *$var_s2 +($wh_last_month-300) * $var_s3);
+            $last_month_bill = round($fixed + 120 * $var_s1 + (300 - 120) *$var_s2 +($wh_last_month-300) * $var_s3+3.36*$wh_last_month);
         }
     }
+}
+
+//排出係数(CO2 キロ/kWh) 杉の木1本で年間14kgのCO2を吸収
+$stmt20 =$pdo->prepare ("SELECT rate FROM emission WHERE plan = '$plan' ");
+$status = $stmt20->execute();
+if($row20 = $stmt20 -> fetch()){
+    $emission_rate = $row20['rate']*1000;
+    }
+//先月の排出量
+$emission_last_month = $wh_last_month * $emission_rate;
+
+//２か月前の排出量と差分の計算
+$emission_two_month_before = $wh_two_month_before * $emission_rate;
+$emission_comparison = round(abs($emission_last_month - $emission_two_month_before));
+
+if ($emission_last_month < $emission_two_month_before){
+    $message = "トン減りました";
 }
 
 ?>
@@ -321,9 +339,36 @@ if($row10 = $stmt10 -> fetch()){
 </header>
 
     <body>
-    <h2>今月のでんきの使い方は？</h2>
-    <div class="tables">
-    <table>
+    <div class ="sub-title">今月のでんきの使い方は？</div>
+
+    <div class ="display-outer">
+        <div class="in-outer">
+            <p class ="month1-before">今日までの電気料金（推定）： <?= $this_month_bill ?> 円</p>
+            <p class ="month2-before">先月の電気料金：<?= $last_month_bill ?> 円</p>
+        </div>
+
+        <div class="in-outer">
+            <p class ="month1-before">今日までの電気使用量： <?= $wh_this_month_r ?> kWh</p>
+            <p class ="month2-before">先月の電気使用量：<?= $wh_last_month_r ?> kWh</p>
+        </div>
+    </div>
+
+    <div class ="display-outer">
+         <!-- グラフ -->
+         <canvas id="chart" height="80" width="150"></canvas>
+
+        <!-- ひとことアドバイス -->
+        <div class="message-wrapper-cum">
+            <img src="img/advice.png" alt="advice" width ="300px">
+            <div id="message"  style="text-align: center">先月や昨年同月と使い方を比較してみましょう。</div>
+        </div>
+    </div>
+    
+
+
+    
+       
+    <!-- <table>
         <tr>
             <th>今日までの電気料金
                 <th> <?= $this_month_bill ?> 円</th>
@@ -334,9 +379,9 @@ if($row10 = $stmt10 -> fetch()){
                 <td><?= $last_month_bill ?> 円</td>
             </td>
         </tr>
-    </table>
+    </table> -->
 
-    <table>
+    <!-- <table>
         <tr>
             <th>今日までの電気使用量
                 <th> <?= $wh_this_month_r ?> kWh</th>
@@ -347,10 +392,10 @@ if($row10 = $stmt10 -> fetch()){
                 <td><?= $wh_last_month_r ?> kWh</td>
             </td>
         </tr>
-    </table>
-    </div>
+    </table> -->
+   
 
-        <canvas id="chart" height="100" width="200"></canvas>
+      
 
 </main>
 
@@ -373,7 +418,15 @@ let this_month = year+'/'+ month;
 let one_month_before = year+'/'+ (month - 1);
 let two_month_before = year+'/'+ (month - 2);
 let three_month_before = year+'/'+ (month - 3);
-    
+
+//メッセージ用（工事中）
+// if (<?= $bill_two_month_before ?> < <?= $last_month_bill ?> ){
+//     $("#message").html ("消し忘れはないですか？今月は省エネを心がけてみましょう。");
+// } else {
+//     $("#message").html ("この調子でさらに省エネをめざしましょう！");
+// }
+
+//グラフ作成
 let js_array = <?php echo $json_array2; ?>;//今月分
 let js_array_last = <?php echo $json_array3; ?>;//先月分
 console.log(js_array);

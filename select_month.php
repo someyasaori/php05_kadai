@@ -169,30 +169,19 @@ if($row9 = $stmt9 -> fetch()){
 </header>
 
 <body>
-<h2><?= $year?>年<?= $month?>月のでんきの使い方は？</h2>
+<div class ="select-title"><?= $year?>年<?= $month?>月のでんきの使い方は？</div>
+
 <div class="tables">
-    <table>
-        <tr>
-            <th><?= $year?>年<?= $month?>月の電気料金
-        </tr>
-        <tr>
-            <td> <?= $selected_month_bill ?> 円</th>
-            </th>   
-        </tr>
-    </table>
+    <p class ="month1-before">
+    <?= $year?>年<?= $month?>月の電気料金：<?= $selected_month_bill ?> 円
+    <br>
+    <?= $year?>年<?= $month?>月の電気使用量：<?= $wh_selected_month_r ?> kWh
+    </p>
 
-    <table>
-        <tr>
-            <th><?= $year?>年<?= $month?>月の電気使用量
-            </tr>
-            <tr>
-                <td> <?= $wh_selected_month_r ?> kWh</td>
-            </th>   
-        </tr>
-    </table>
 </div>
-        <canvas id="chart" height="100" width="200"></canvas>
-
+<div class="chart-center">
+    <canvas id="chart" height="100" width="200" style="display: block; margin: auto;"></canvas>
+</div>
 </main>   
 
 <!-- JQuery -->
